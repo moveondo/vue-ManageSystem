@@ -69,9 +69,7 @@
    ```javascript
     HTML
       <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> </el-table>
-  
   增加 :row-class-name="tableRowClassName"，在methods里面增加index
-
     methods: {
            tableRowClassName(row, index) {
                //把每一行的索引放进row
