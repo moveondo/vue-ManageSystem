@@ -256,17 +256,60 @@
                 })
             },  
          
-         用的时候直接取：
-            let platformName=this.itemList[platformId];
-          记住data里面声明：
-          
+ 用的时候直接取：
+    let platformName=this.itemList[platformId];
+    
+  记住data里面声明：    
        data: function(){
             return {
                itemList:Array,  
             }
         }
 ```
+### 7,后端需要传入Json列表，如何传入? 做成数组 一次性传入 ###
+```javascript
+ 
+ onUpdate() {
+              var ProductId=this.$route.query.productId;
 
+                let RateA=this.interestRate.attributeValue;
+                let RateMax=this.interestRate.maxValue;
+                let RateMin=this.interestRate.minValue;
+
+                let loanPeriodA=this.loanPeriod.attributeValue;
+                let loanPeriodMax=this.loanPeriod.maxValue;
+                let loanPeriodMin=this.loanPeriod.minValue;
+
+                let quotaA=this.quota.attributeValue;
+                let quotaMax=this.quota.maxValue;
+                let quotaMin=this.quota.minValue;
+
+                let loanTimeA=this.loanTime.attributeValue;
+                let loanTimeMax=this.loanTime.maxValue;
+                let loanTimeMin=this.loanTime.minValue;
+
+                if(RateA=='' || RateMax=='' || RateMin=='') {
+                  this.$message.error('请填写年化利率属性值/最大值/最小值');
+                  return false;
+                }else if (loanPeriodA=='' || loanPeriodMax=='' || loanPeriodMin=='' ){
+                  this.$message.error('请填写借款期限属性值/最大值/最小值');
+                  return false;
+                }else if (quotaA=='' || quotaMax=='' || quotaMin==''){
+                  this.$message.error('请填写额度属性值/最大值/最小值');
+                  return false;
+                }else if (loanTimeA=='' || loanTimeMax=='' || loanTimeMin==''){
+                  this.$message.error('请填写放款时长属性值/最大值/最小值');
+                  return false;
+                }
+
+ let params=[
+       {"attributeType":1,"attributeValue":RateA,"maxValue":RateMax,"minValue":RateMin,"isactive":true,"productId":ProductId },{"attributeType":3,"attributeValue":loanPeriodA,"maxValue":loanPeriodMax,"minValue":loanPeriodMin,"isactive":true,"productId":ProductId }, {"attributeType":2,"attributeValue":quotaA,"maxValue":quotaMax,"minValue":quotaMin,"isactive":true,"productId":ProductId },{"attributeType":4,"attributeValue":loanTimeA,"maxValue":loanTimeMax,"minValue":loanTimeMin,"isactive":true,"productId":ProductId }
+     ]
+          this.UpdateData(params,ProductId);
+            },
+            
+```
+ 
 
 
 ## 其他注意事项 ##
