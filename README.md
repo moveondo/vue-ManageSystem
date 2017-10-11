@@ -64,28 +64,10 @@
 	// 执行构建命令，生成的dist文件夹放在服务器下即可访问
 	npm run build
 
-## 组件使用说明与演示 ##
-
-### 参考组件：
-
-### element-ui ###
-一套基于vue.js2.0的桌面组件库。访问地址：[element](http://element.eleme.io/#/zh-CN/component/layout)
-
-### vue-datasource ###
-一个用于动态创建表格的vue.js服务端组件。访问地址：[vue-datasource](https://github.com/coderdiaz/vue-datasource)
+## 遇到问题总结 ##
 
 
 
-### Vue-Quill-Editor ###
-基于Quill、适用于Vue2的富文本编辑器。访问地址：[vue-quill-editor](https://github.com/surmon-china/vue-quill-editor)
-
-### Vue-SimpleMDE ###
-Vue.js的Markdown Editor组件。访问地址：[Vue-SimpleMDE](https://github.com/F-loat/vue-simplemde)
-
-
-
-### Vue-Core-Image-Upload ###
-一款轻量级的vue上传插件，支持裁剪。访问地址：[Vue-Core-Image-Upload](https://github.com/Vanthink-UED/vue-core-image-upload)
 
 
 
@@ -138,10 +120,12 @@ import 'element-ui/lib/theme-default/index.css';    // 默认主题
 第三步：打开 src/components/common/Sidebar.vue 文件，找到 el-menu 标签，把 theme="dark" 去掉即可。
 
 ## 项目截图 ##
-### 默认皮肤 ###
+### 项目生成截图 ###
 
 ![Image text](https://github.com/lin-xin/manage-system/raw/master/screenshots/wms1.png)
 
-### 浅绿色皮肤 ###
+### 项目代码截图 ###
 
-![Image text](https://github.com/lin-xin/manage-system/raw/master/screenshots/wms2.png)
+![Image text](https://github.com/lin-xin/manage-system/raw/master/screenshots/wms1.png)
+
+
