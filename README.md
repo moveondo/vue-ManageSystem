@@ -67,7 +67,7 @@
  ### 如何生成序号1,2,3 ###
  
   ```HTML
-  <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> 
+      <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> </el-table>
   ```
   
   增加 :row-class-name="tableRowClassName"，在methods里面增加index
