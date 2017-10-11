@@ -82,7 +82,7 @@
    ```
   
 
-  ### 如何查看每行的数据 即怎么传入行ID ###
+  ### 如何查看每行的数据 即怎么传入行ID
   
   ```HTML
   <el-table-column label="操作" width="180">
@@ -103,11 +103,11 @@
      handleRead(index,row){
                 //this.$message('查看'+(index+1)+'行');
                 this.$router.push({ path: 'productsiglelist', query: { productId: row.id }});
-            },
-            handleEdit(index, row) {
+        },
+      handleEdit(index, row) {
                 this.$message('编辑第'+(index+1)+'行');
                 this.$router.push({ path: 'productupdate', query: { productId: row.id }});
-          },
+      },
     ```
   
 
