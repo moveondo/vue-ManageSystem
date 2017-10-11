@@ -64,22 +64,22 @@
 
 ## 遇到问题总结 ##
 
- ### 如何生成序号1,2,3
+ ### 如何生成序号1,2,3 ###
  
-  ``` 
+  
   <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> 
-  ```
+  
   
   增加 :row-class-name="tableRowClassName"，在methods里面增加index
   
-  ```
+ 
   methods: {
            tableRowClassName(row, index) {
                //把每一行的索引放进row
                row.index = (index+1)+(this.cur_page-1)*20;
            }
          }
-  ```
+  
 
   ### 如何查看每行的数据 即怎么传入行ID ###
   
@@ -98,15 +98,15 @@
   
   路由跳转传参数在method里定义方法，传入row,其中row.id 中id是后端接口定义
   
-  ``` handleRead(index,row){
+   handleRead(index,row){
                 //this.$message('查看'+(index+1)+'行');
                 this.$router.push({ path: 'productsiglelist', query: { productId: row.id }});
             },
             handleEdit(index, row) {
                 this.$message('编辑第'+(index+1)+'行');
                 this.$router.push({ path: 'productupdate', query: { productId: row.id }});
-            },
-  ```
+          },
+  
 
 
 
