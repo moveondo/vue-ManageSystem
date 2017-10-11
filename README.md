@@ -65,12 +65,16 @@
 ## 遇到问题总结 ##
 
  ### 如何生成序号1,2,3... ###
+ 
   ```
     <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable">
+    
   ```
+  
   增加 :row-class-name="tableRowClassName"
   
   在methods里面增加index
+  
   ```
     methods: {
            tableRowClassName(row, index) {
@@ -94,6 +98,7 @@
                 </template>
       </el-table-column>
   ```
+  
   路由跳转传参数在method里定义方法，传入row,其中row.id 中id是后端接口定义
   
   ```
