@@ -66,14 +66,12 @@
 
  ### 如何生成序号1,2,3
  
-  ```HTML
+   ```JavaScript
+    HTML
       <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> </el-table>
-   ```
-  
   
   增加 :row-class-name="tableRowClassName"，在methods里面增加index
-  
-  ```JavaScript:
+
     methods: {
            tableRowClassName(row, index) {
                //把每一行的索引放进row
@@ -85,7 +83,9 @@
 
   ### 如何查看每行的数据 即怎么传入行ID
   
-  ```HTML
+  ```JavaScript
+  
+  HTML
   <el-table-column label="操作" width="180">
              <template scope="scope">
                   <el-button size="small"
@@ -96,11 +96,10 @@
                           @click="handleDelete(scope.$index, scope.row)">不展示</el-button> -->
                 </template>
       </el-table-column>
-  ```
+  
   
   路由跳转传参数在method里定义方法，传入row,其中row.id 中id是后端接口定义
-  
-   ```JavaScript
+   
      handleRead(index,row){
                 //this.$message('查看'+(index+1)+'行');
                 this.$router.push({ path: 'productsiglelist', query: { productId: row.id }});
@@ -113,13 +112,14 @@
     
   ### 如何得到input值并传给后端接口
    
-   ```
-     平台名称：<el-input v-model="select_word"  placeholder="筛选平台" ref="flat" class="handle-input mr10"></el-input>
-     产品名称：<el-input v-model="select_word0"  placeholder="筛选产品" ref="product" class="handle-input mr10"></el-input>
-   ```
+   ```javacript
+   
+    HTML:
+    平台名称：<el-input v-model="select_word"  placeholder="筛选平台" ref="flat" class="handle-input mr10"></el-input>
+    产品名称：<el-input v-model="select_word0"  placeholder="筛选产品" ref="product" class="handle-input mr10"></el-input>
+   
     增加ref,传值
-    
-    ```
+      
     search(){
                 this.is_search = true;
                 let platValue=this.$refs.flat.value;
@@ -136,9 +136,12 @@
     ```
     
   ### 如何把后端数据展示出来 ?如何取前面传的值 
-  
-   ```
-     <el-form-item label="平台名称">
+
+          
+      ```JavaScript
+      
+      HTML
+     <el-form-item label="平台名称">
                     <div class="">
                       {{form.platformName}}
                     </div>
@@ -148,10 +151,9 @@
                       {{form.productName}}
                     </div>
                 </el-form-item>
-        ```
-        初始化值为
-        
-      ```JavaScript
+        
+        Javascript:
+        初始化值为
         data: function(){
             return {
                 form: {
@@ -186,7 +188,54 @@
                 })
             },
       ```
+  ### option控件如何根据后端返回数据定位
+  
+  ```javascript
+     HTML
+     <el-form-item label="筛选字段">
+                      <el-select v-model="form.fields" placeholder="请选择">
+                        <el-option v-for="(item, index) of fieldsValue" :label="item.lable" :value="item.value"></el-option>
+                      </el-select>
+      </el-form-item>
+      
+      javascript:
+        data里面：
+                fieldsValue:[
+                  {
+                    lable:'属性值',
+                    value:'attribute_value'
+                  },{
+                    lable:'最大值',
+                    value:'max_value'
+                  },{
+                    lable:'最小值',
+                    value:'min_value'
+                  }
+                ]
+          
+        async created(){
 
+          this.getDataQuery();
+          let Id=this.$route.query.platformId;
+          this.getDataQueryName(Id);
+        },
+        进行赋值， :value前面有：
+          getDataQueryName(Id){
+              let self = this; //
+              self.$axios.get("/ccdproduct/productFiltrate/queryPlatformById.htm?productFiltrateId="+Id).then((res) => {
+                  this.form.name=res.data.content.productFiltrateName;
+                  this.form.client=res.data.content.display;
+                  this.form.fields=res.data.content.filtrateAttributeColumn;
+                  this.form.selected=res.data.content.filtrateAttributeType;
+                  this.form.sort=res.data.content.filtrateType;
+
+                  this.form.Id=Id;
+
+              }).catch(function(err){
+                 console.log("调用失败0",err)
+              })
+            },
+  ```
 
 
 ## 其他注意事项 ##
