@@ -1,8 +1,6 @@
-# manage-system #
+# ManageSystem #
 
 本文参考基于Vue.js 2.x系列 + Element UI 的后台管理系统解决方案。[线上地址](http://blog.gdfengshuo.com/example/work/)
-
-[English document](https://github.com/lin-xin/manage-system/blob/master/README_EN.md)
 
 
 
@@ -66,9 +64,48 @@
 
 ## 遇到问题总结 ##
 
+ ### 如何生成序号1,2,3... ###
+  ```
+    <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable">
+  ```
+  增加 :row-class-name="tableRowClassName"
+  
+  在methods里面增加index
+  ```
+    methods: {
+           tableRowClassName(row, index) {
+               //把每一行的索引放进row
+               row.index = (index+1)+(this.cur_page-1)*20;
+           }
+         }
+  ```
 
-
-
+  ### 如何查看每行的数据 即怎么传入行ID ###
+  
+  ```
+    <el-table-column label="操作" width="180">
+             <template scope="scope">
+                  <el-button size="small"
+                          @click="handleRead(scope.$index, scope.row)">查看</el-button>
+                    <el-button size="small"
+                          @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                    <!-- <el-button size="small" type="danger"
+                          @click="handleDelete(scope.$index, scope.row)">不展示</el-button> -->
+                </template>
+      </el-table-column>
+  ```
+  路由跳转传参数在method里定义方法，传入row,其中row.id 中id是后端接口定义
+  
+  ```
+           handleRead(index,row){
+                //this.$message('查看'+(index+1)+'行');
+                this.$router.push({ path: 'productsiglelist', query: { productId: row.id }});
+            },
+            handleEdit(index, row) {
+                this.$message('编辑第'+(index+1)+'行');
+                this.$router.push({ path: 'productupdate', query: { productId: row.id }});
+            },
+  ```
 
 
 
