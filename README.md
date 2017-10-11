@@ -64,10 +64,11 @@
 
 ## 遇到问题总结 ##
 
- ### 如何生成序号1,2,3 ###
+ ### 如何生成序号1,2,3
  
   ```HTML
-      <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> </el-table>```
+      <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> </el-table>
+   ```
   
   
   增加 :row-class-name="tableRowClassName"，在methods里面增加index
@@ -78,7 +79,8 @@
                //把每一行的索引放进row
                row.index = (index+1)+(this.cur_page-1)*20;
            }
-         }```
+         }
+    ```
   
 
   ### 如何查看每行的数据 即怎么传入行ID
@@ -108,6 +110,7 @@
                 this.$router.push({ path: 'productupdate', query: { productId: row.id }});
       },
     ```
+    
   ### 如何得到input值并传给后端接口
    
    ```
@@ -128,10 +131,61 @@
                 let self = this;
                 self.$axios.post(self.url, {"platformName":platValue,"productName":productValue}).then((res) => {
                     self.tableData = res.data.content.list;
-
                 })
             },
     ```
+    
+  ### 如何把后端数据展示出来 ?如何取前面传的值 
+  
+   ```
+     <el-form-item label="平台名称">
+                    <div class="">
+                      {{form.platformName}}
+                    </div>
+                </el-form-item>
+                <el-form-item label="产品名称">
+                    <div class="">
+                      {{form.productName}}
+                    </div>
+                </el-form-item>
+        ```
+        初始化值为
+        
+      ```JavaScript
+        data: function(){
+            return {
+                form: {
+                    platformName: '',
+                    productName: '',
+                    IsDisplay: '',
+                    productUrl:'',
+                    productPresentation:'',
+                },
+            }
+        },
+        created(){
+          let Id=this.$route.query.productId;
+           this.getData(Id);
+        },
+        methods: {
+            getData(Id){
+                let self = this;
+                self.$axios.get("/ccdproduct/product/queryProductById.htm?productId="+Id).then((res) => {
+                     let IsDisplay=res.data.content.isDisplay;
+
+                       if(IsDisplay==true){  this.form.IsDisplay='是';}
+                       else if(IsDisplay==false) { this.form.IsDisplay='否'; }
+
+                       console.log(IsDisplay,this.form.IsDisplay);
+                       this.form.platformName=res.data.content.platformName;
+                       this.form.productName=res.data.content.productName;
+                       this.form.productName=res.data.content.productName;
+                       this.form.productUrl=res.data.content.productUrl;
+                       this.form.productPresentation=res.data.content.productPresentation;
+                       this.form.Id=Id;
+                })
+            },
+      ```
 
 
 
