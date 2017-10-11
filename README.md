@@ -1,27 +1,24 @@
 # manage-system #
-基于Vue.js 2.x系列 + Element UI 的后台管理系统解决方案。[线上地址](http://blog.gdfengshuo.com/example/work/)
+
+本文参考基于Vue.js 2.x系列 + Element UI 的后台管理系统解决方案。[线上地址](http://blog.gdfengshuo.com/example/work/)
 
 [English document](https://github.com/lin-xin/manage-system/blob/master/README_EN.md)
 
-## 捐赠
-![微信扫一扫](http://blog.gdfengshuo.com/images/weixin.jpg)
+
 
 ## 前言 ##
-之前在公司用了Vue + Element组件库做了个后台管理系统，基本很多组件可以直接引用组件库的，但是也有一些需求无法满足。像图片裁剪上传、富文本编辑器、图表等这些在后台管理系统中很常见的功能，就需要引用其他的组件才能完成。从寻找组件，到使用组件的过程中，遇到了很多问题，也积累了宝贵的经验。所以我就把开发这个后台管理系统的经验，总结成这个后台管理系统解决方案。
+ 本文参考了Vue + Element组件库做了个后台管理系统，结合本公司后端Java人员提供的接口进行开发，做到从前端界面展示到后端接口的取值。在使用本框架中，遇到了很多问题，也积累了宝贵的经验。所以我就把开发这个后台管理系统的经验，上传到github上进行代码备份。
 
-该方案作为一套多功能的后台框架模板，适用于绝大部分的后台管理系统（Web Management System）开发。基于vue.js,使用vue-cli脚手架快速生成项目目录，引用Element UI组件库，方便开发快速简洁好看的组件。分离颜色样式，支持手动切换主题色，而且很方便使用自定义主题色。
 
 ## 功能 ##
 - [x] Element UI
 - [x] 登录/注销
-- [x] 表格
-- [x] 表单
-- [x] 图表 :bar_chart:
-- [x] 富文本编辑器
-- [x] markdown编辑器
-- [x] 图片拖拽/裁剪上传
-- [x] 支持切换主题色 :sparkles:
-- [x] 列表拖拽排序
+- [x] 查看平台列表 
+- [x] 查看平台详情
+- [x] 创建/更新 平台信息 
+- [x] 保存平台信息 
+
+以上功能均由后端接口参与
 
 
 ## 目录结构介绍 ##
@@ -34,16 +31,13 @@
 	|           |-- Header.vue           // 公共头部
 	|           |-- Home.vue           	 // 公共路由入口
 	|           |-- Sidebar.vue          // 公共左边栏
-	|		|-- page                   	 // 主要路由页面
-	|           |-- BaseCharts.vue       // 基础图表
-	|           |-- BaseForm.vue         // 基础表单
-	|           |-- BaseTable.vue        // 基础表格
-	|           |-- Login.vue          	 // 登录
-	|           |-- Markdown.vue         // markdown组件
-	|           |-- Readme.vue           // 自述组件
-	|           |-- Upload.vue           // 图片上传
-	|           |-- VueEditor.vue        // 富文本编辑器
-	|           |-- VueTable.vue         // vue表格组件
+	|		|-- project                   // 主要路由页面
+	|           |-- ProductCreate.vue    // 产品页面创建
+	|           |-- ProductCreate1.vue   // 产品页面创建1
+	|           |-- ProductList.vue       //产品列表
+	|           |-- ProductSigleList.vue  // 产品单个页面查看
+	|           |-- ProductUpdate.vue     // 产品更新
+	|           |-- ProductUpdate1.vue    // 产品更新页面1
 	|   |-- App.vue                      // 页面入口文件
 	|   |-- main.js                      // 程序入口文件，加载各种公共组件
 	|-- .babelrc                         // ES6语法编译配置
@@ -56,13 +50,13 @@
 
 ## 安装步骤 ##
 
-	git clone https://github.com/lin-xin/manage-system.git      // 把模板下载到本地
-	cd manage-system    // 进入模板目录
+	git clone https://github.com/moveondo/vue-ManageSystem.git      // 把模板下载到本地
+	cd vue-ManageSystem    // 进入模板目录
 	npm install         // 安装项目依赖，等待安装完成之后
 
 ## 本地开发 ##
 
-	// 开启服务器，浏览器访问 http://localhost:8080
+	
 	npm run dev
 
 ## 构建生产 ##
@@ -70,70 +64,10 @@
 	// 执行构建命令，生成的dist文件夹放在服务器下即可访问
 	npm run build
 
-## 组件使用说明与演示 ##
-
-### vue-schart ###
-vue.js封装sChart.js的图表组件。访问地址：[vue-schart](https://github.com/linxin/vue-schart)
-<p><a href="https://www.npmjs.com/package/vue-schart"><img src="https://img.shields.io/npm/dm/vue-schart.svg" alt="Downloads"></a></p>
-
-```JavaScript
-<template>
-    <div>
-        <schart :canvasId="canvasId"
-				:type="type"
-				:width="width"
-				:height="height"
-				:data="data"
-				:options="options"
-		></schart>
-    </div>
-</template>
-	
-<script>
-    import Schart from 'vue-schart';        // 导入Schart组件
-    export default {
-        data: function(){
-            return {
-                canvasId: 'myCanvas',       // canvas的id
-                type: 'bar',                // 图表类型
-                width: 500,
-                height: 400,
-                data: [
-                    {name: '2014', value: 1342},
-                    {name: '2015', value: 2123},
-                    {name: '2016', value: 1654},
-                    {name: '2017', value: 1795},
-                ],
-                options: {                  // 图表可选参数
-                    title: 'Total sales of stores in recent years'
-                }
-            }
-        },
-        components: {
-            Schart
-        }
-    }
-</script>
-```
-
-### element-ui ###
-一套基于vue.js2.0的桌面组件库。访问地址：[element](http://element.eleme.io/#/zh-CN/component/layout)
-
-### vue-datasource ###
-一个用于动态创建表格的vue.js服务端组件。访问地址：[vue-datasource](https://github.com/coderdiaz/vue-datasource)
+## 遇到问题总结 ##
 
 
 
-### Vue-Quill-Editor ###
-基于Quill、适用于Vue2的富文本编辑器。访问地址：[vue-quill-editor](https://github.com/surmon-china/vue-quill-editor)
-
-### Vue-SimpleMDE ###
-Vue.js的Markdown Editor组件。访问地址：[Vue-SimpleMDE](https://github.com/F-loat/vue-simplemde)
-
-
-
-### Vue-Core-Image-Upload ###
-一款轻量级的vue上传插件，支持裁剪。访问地址：[Vue-Core-Image-Upload](https://github.com/Vanthink-UED/vue-core-image-upload)
 
 
 
@@ -186,10 +120,12 @@ import 'element-ui/lib/theme-default/index.css';    // 默认主题
 第三步：打开 src/components/common/Sidebar.vue 文件，找到 el-menu 标签，把 theme="dark" 去掉即可。
 
 ## 项目截图 ##
-### 默认皮肤 ###
+### 项目生成截图 ###
 
 ![Image text](https://github.com/lin-xin/manage-system/raw/master/screenshots/wms1.png)
 
-### 浅绿色皮肤 ###
+### 项目代码截图 ###
 
-![Image text](https://github.com/lin-xin/manage-system/raw/master/screenshots/wms2.png)
+![Image text](https://github.com/lin-xin/manage-system/raw/master/screenshots/wms1.png)
+
+
