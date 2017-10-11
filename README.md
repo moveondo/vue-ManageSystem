@@ -64,8 +64,7 @@
 
 ## 遇到问题总结 ##
 
-
- ### 如何生成序号1,2,3 ###
+### 如何生成序号1,2,3 ###
  
    ```javascript
     HTML
@@ -82,7 +81,7 @@
     ```
   
 
-  ### 如何查看每行的数据 即怎么传入行ID ###
+### 如何查看每行的数据 即怎么传入行ID ###
   
   ```javascript
   HTML
@@ -110,7 +109,7 @@
       },
     ```
     
-  ### 如何得到input值并传给后端接口 ###
+### 如何得到input值并传给后端接口 ###
    
   ```javascript
    
@@ -135,7 +134,7 @@
             }
     ```
     
-  ### 如何把后端数据展示出来 ?如何取前面传的值 ###
+### 如何把后端数据展示出来 ?如何取前面传的值 ###
 
           
       ```javascript
@@ -188,7 +187,7 @@
                 })
             },
       ```
-  ### option控件如何根据后端返回数据定位 ###
+### option控件如何根据后端返回数据定位 ###
   
  ```javascript
      HTML
@@ -236,6 +235,39 @@
               })
             },
   ```
+ 
+### 后端一个接口的数据依赖另一个接口，我的做法是先取出存数组里面 ###
+ 
+ ```
+   getDataQueryName(){
+                let self = this;
+                self.$axios.post(self.url0,{}).then((res) => {
+                    self.Properties=res.data.content;
+
+                    for(var i= 0,len=self.Properties.length;i<len;i++){
+
+                      var platformId = self.Properties[i].platformId;
+                      var platformName = self.Properties[i].platformName;
+                    //  alert(buteName)
+                       self.itemList[platformId] = platformName;
+                    }
+
+                }).catch(function(err){
+                   console.log("调用失败1",err)
+                })
+            },  
+         
+         用的时候直接取：
+            let platformName=this.itemList[platformId];
+          记住data里面声明：
+          
+       data: function(){
+            return {
+               itemList:Array,  
+            }
+        }
+ ```
+
 
 
 ## 其他注意事项 ##
