@@ -109,7 +109,30 @@
                 this.$router.push({ path: 'productupdate', query: { productId: row.id }});
       },
     ```
-  
+  ### 如何得到input值并传给后端接口
+   
+   ```
+     平台名称：<el-input v-model="select_word"  placeholder="筛选平台" ref="flat" class="handle-input mr10"></el-input>
+     产品名称：<el-input v-model="select_word0"  placeholder="筛选产品" ref="product" class="handle-input mr10"></el-input>
+   ```
+    增加ref,传值
+    
+    ```
+    search(){
+                this.is_search = true;
+                let platValue=this.$refs.flat.value;
+                let productValue=this.$refs.product.value;
+                this.queryData(platValue,productValue);
+             },
+    
+        queryData(platValue,productValue){
+                let self = this;
+                self.$axios.post(self.url, {"platformName":platValue,"productName":productValue}).then((res) => {
+                    self.tableData = res.data.content.list;
+
+                })
+            },
+    ```
 
 
 
