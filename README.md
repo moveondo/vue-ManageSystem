@@ -66,7 +66,7 @@
 
  ### 如何生成序号1,2,3
  
-   ```
+   ```javascript
     HTML
       <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> </el-table>
   
@@ -83,8 +83,7 @@
 
   ### 如何查看每行的数据 即怎么传入行ID
   
-  ```
-  
+  ```javascript
   HTML
   <el-table-column label="操作" width="180">
              <template scope="scope">
@@ -112,7 +111,7 @@
     
   ### 如何得到input值并传给后端接口
    
-   ```
+  ```javascript
    
     HTML:
     平台名称：<el-input v-model="select_word"  placeholder="筛选平台" ref="flat" class="handle-input mr10"></el-input>
@@ -138,7 +137,7 @@
   ### 如何把后端数据展示出来 ?如何取前面传的值 
 
           
-      ```JavaScript
+      ```javascript
       
       HTML
      <el-form-item label="平台名称">
@@ -190,7 +189,7 @@
       ```
   ### option控件如何根据后端返回数据定位
   
-  ```javascript
+ ```javascript
      HTML
      <el-form-item label="筛选字段">
                       <el-select v-model="form.fields" placeholder="请选择">
