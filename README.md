@@ -64,18 +64,21 @@
 
 ## 遇到问题总结 ##
 
+
  ### 如何生成序号1,2,3 ###
  
    ```javascript
     HTML
-      <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> </el-table>
-  增加 :row-class-name="tableRowClassName"，在methods里面增加index
-    methods: {
-           tableRowClassName(row, index) {
+      <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> 
+      </el-table>
+      
+  增加 :row-class-name="tableRowClassName"，在methods里面增加tableRowClassName
+  
+     tableRowClassName(row, index) {
                //把每一行的索引放进row
                row.index = (index+1)+(this.cur_page-1)*20;
-           }
-         }
+     }
+         
     ```
   
 
@@ -129,7 +132,7 @@
                 self.$axios.post(self.url, {"platformName":platValue,"productName":productValue}).then((res) => {
                     self.tableData = res.data.content.list;
                 })
-            },
+            }
     ```
     
   ### 如何把后端数据展示出来 ?如何取前面传的值 ###
