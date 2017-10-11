@@ -122,10 +122,10 @@ import 'element-ui/lib/theme-default/index.css';    // 默认主题
 ## 项目截图 ##
 ### 项目生成截图 ###
 
-![Image text](https://github.com/lin-xin/manage-system/raw/master/screenshots/wms1.png)
+![Image text](https://github.com/moveondo/vue-ManageSystem/blob/master/static/img/like.png)
 
 ### 项目代码截图 ###
 
-![Image text](https://github.com/lin-xin/manage-system/raw/master/screenshots/wms1.png)
+![Image text](https://github.com/moveondo/vue-ManageSystem/blob/master/static/img/project.png)
 
 
