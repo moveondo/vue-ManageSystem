@@ -67,17 +67,16 @@
 ### 如何生成序号1,2,3 ###
 
  
-   ```javascript  
-        HTML
-        <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> </el-table>
-      
+```javascript  
+        HTML: <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> </el-table>
+   
         增加 :row-class-name="tableRowClassName"，在methods里面增加tableRowClassName
   
         tableRowClassName(row, index) {
                //把每一行的索引放进row
                row.index = (index+1)+(this.cur_page-1)*20;
          }        
-    ```
+```
   
 
 ### 如何查看每行的数据 即怎么传入行ID ###
