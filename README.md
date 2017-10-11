@@ -67,23 +67,24 @@
 ### 如何生成序号1,2,3 ###
  
    ```javascript
+   
     HTML
       <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> 
       </el-table>
       
-  增加 :row-class-name="tableRowClassName"，在methods里面增加tableRowClassName
+       增加 :row-class-name="tableRowClassName"，在methods里面增加tableRowClassName
   
      tableRowClassName(row, index) {
                //把每一行的索引放进row
                row.index = (index+1)+(this.cur_page-1)*20;
-     }
-         
+     }        
     ```
   
 
 ### 如何查看每行的数据 即怎么传入行ID ###
   
   ```javascript
+  
   HTML
   <el-table-column label="操作" width="180">
              <template scope="scope">
@@ -135,8 +136,7 @@
     ```
     
 ### 如何把后端数据展示出来 ?如何取前面传的值 ###
-
-          
+       
       ```javascript
       
       HTML
@@ -187,9 +187,11 @@
                 })
             },
       ```
+      
 ### option控件如何根据后端返回数据定位 ###
   
  ```javascript
+ 
      HTML
      <el-form-item label="筛选字段">
                       <el-select v-model="form.fields" placeholder="请选择">
@@ -239,7 +241,7 @@
 ### 后端一个接口的数据依赖另一个接口，我的做法是先取出存数组里面 ###
  
  ```
-   getDataQueryName(){
+ getDataQueryName(){
                 let self = this;
                 self.$axios.post(self.url0,{}).then((res) => {
                     self.Properties=res.data.content;
