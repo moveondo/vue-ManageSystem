@@ -81,7 +81,7 @@
 
 ### 如何查看每行的数据 即怎么传入行ID ###
   
-  ```javascript
+```javascript
   
   HTML
   <el-table-column label="操作" width="180">
@@ -106,11 +106,11 @@
                 this.$message('编辑第'+(index+1)+'行');
                 this.$router.push({ path: 'productupdate', query: { productId: row.id }});
       },
-    ```
+```
     
 ### 如何得到input值并传给后端接口 ###
    
-  ```javascript
+```javascript
    
     HTML:
     平台名称：<el-input v-model="select_word"  placeholder="筛选平台" ref="flat" class="handle-input mr10"></el-input>
@@ -131,11 +131,11 @@
                     self.tableData = res.data.content.list;
                 })
             }
-    ```
+```
     
 ### 如何把后端数据展示出来 ?如何取前面传的值 ###
        
-      ```javascript
+```javascript
       
       HTML
      <el-form-item label="平台名称">
@@ -184,11 +184,11 @@
                        this.form.Id=Id;
                 })
             },
-      ```
+```
       
 ### option控件如何根据后端返回数据定位 ###
   
- ```javascript
+```javascript
      HTML
      <el-form-item label="筛选字段">
                       <el-select v-model="form.fields" placeholder="请选择">
@@ -233,11 +233,11 @@
                  console.log("调用失败0",err)
               })
             },
-  ```
+```
  
 ### 后端一个接口的数据依赖另一个接口，我的做法是先取出存数组里面 ###
  
- ```
+```javascript
  getDataQueryName(){
                 let self = this;
                 self.$axios.post(self.url0,{}).then((res) => {
@@ -265,7 +265,7 @@
                itemList:Array,  
             }
         }
- ```
+```
 
 
 
