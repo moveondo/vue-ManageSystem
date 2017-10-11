@@ -65,9 +65,9 @@
 ## 遇到问题总结 ##
 
 ### 如何生成序号1,2,3 ###
+
  
-   ```javascript
-   
+   ```javascript  
     HTML
       <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> 
       </el-table>
@@ -191,7 +191,6 @@
 ### option控件如何根据后端返回数据定位 ###
   
  ```javascript
- 
      HTML
      <el-form-item label="筛选字段">
                       <el-select v-model="form.fields" placeholder="请选择">
