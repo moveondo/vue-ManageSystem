@@ -306,7 +306,7 @@
        {"attributeType":1,"attributeValue":RateA,"maxValue":RateMax,"minValue":RateMin,"isactive":true,"productId":ProductId },{"attributeType":3,"attributeValue":loanPeriodA,"maxValue":loanPeriodMax,"minValue":loanPeriodMin,"isactive":true,"productId":ProductId }, {"attributeType":2,"attributeValue":quotaA,"maxValue":quotaMax,"minValue":quotaMin,"isactive":true,"productId":ProductId },{"attributeType":4,"attributeValue":loanTimeA,"maxValue":loanTimeMax,"minValue":loanTimeMin,"isactive":true,"productId":ProductId }
      ]
           this.UpdateData(params,ProductId);
-            },
+      },
             
 ```
  
