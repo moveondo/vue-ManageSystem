@@ -66,7 +66,7 @@
 
  ### 如何生成序号1,2,3
  
-   ```JavaScript
+   ```
     HTML
       <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"> </el-table>
   
@@ -83,7 +83,7 @@
 
   ### 如何查看每行的数据 即怎么传入行ID
   
-  ```JavaScript
+  ```
   
   HTML
   <el-table-column label="操作" width="180">
@@ -112,7 +112,7 @@
     
   ### 如何得到input值并传给后端接口
    
-   ```javacript
+   ```
    
     HTML:
     平台名称：<el-input v-model="select_word"  placeholder="筛选平台" ref="flat" class="handle-input mr10"></el-input>
