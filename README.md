@@ -29,8 +29,6 @@
 	|           |-- Header.vue           // 公共头部
 	|           |-- Home.vue           	 // 公共路由入口
 	|           |-- Sidebar.vue          // 公共左边栏
-    |        |-- page                     // 参考模板
-    |           |-- test.vue           // 具体请参考模板
 	|		 |-- project                  // 主要路由页面
 	|           |-- ProductCreate.vue    // 产品页面创建
 	|           |-- ProductCreate1.vue   // 产品页面创建1
