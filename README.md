@@ -29,6 +29,7 @@
 	|           |-- Header.vue           // 公共头部
 	|           |-- Home.vue           	 // 公共路由入口
 	|           |-- Sidebar.vue          // 公共左边栏
+            |-- page                     // 参考模板
 	|		|-- project                   // 主要路由页面
 	|           |-- ProductCreate.vue    // 产品页面创建
 	|           |-- ProductCreate1.vue   // 产品页面创建1
@@ -309,8 +310,62 @@
       },
             
 ```
- 
+### 8,分页展示 ###
+```javascript
+   HTML：
+     <el-pagination
+                 @size-change="handleSizeChange"
+                 @current-change="handleCurrentChange"
+                 :current-page.sync="currentPage1"
+                 :page-size="pageSize"
+                 layout="total, prev, pager, next"
+                 :total="totalNum">
+     </el-pagination>
+   
+   javascript：
+    data() {
+            return {          
+                url:"/ccdproduct/platform/queryPlatform.htm",
+                tableData: [],
+                cur_page: 1,
+                multipleSelection: [],
+                select_cate: '',
+                select_word: '',
+                del_list: [],
+                is_search: false,
+                picked:'',
+                currentPage1:1,  //初始化
+                totalNum:0,   //初始化
+                pageSize:0,   //初始化
+            }
+        }, 
+       methods:里面
+      queryData(page,InputValue,Pick){
+                let self = this;
+                self.$axios.post(self.url, {startPage:page,platformName:InputValue,display:Pick}).then((res) => {
+                    self.tableData = res.data.content.list;
+                    //对总页数进行赋值
+                    self.totalNum=res.data.content.totalCount;
+                    //对每页显示数量进行赋值
+                    self.pageSize=res.data.content.pageSize;
 
+                })
+            },
+   
+```
+### 8,查询时多查询方式相互依赖 ### 
+```javascript
+  html进行v-model绑定:
+    <el-input v-model="select_word" placeholder="筛选关键词" ref="input" class="handle-input mr10"></el-input>
+            <el-button type="primary" icon="search" @click="search">搜索</el-button>
+            <span class="radio">
+              <input type="radio" id="yes" :value="true"  v-model="picked" @click="Front"><label for="yes">在客户端显示</label>
+              <input type="radio" id="no"  :value="false" v-model="picked" @click="Front"><label for="no">不在客户端显示</label>
+            </span>
+   js:         
+   传入需要查询的字段
+  this.queryData(this.cur_page,this.select_word,this.picked);
+```
 
 ## 其他注意事项 ##
 ### 一、如果我不想用到上面的某些组件呢，那我怎么在模板中删除掉不影响到其他功能呢？ ###
