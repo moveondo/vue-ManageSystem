@@ -352,7 +352,7 @@
             },
    
 ```
-### 8,查询时多查询方式相互依赖 ### 
+### 9,查询时多查询方式相互依赖 ### 
 ```javascript
   html进行v-model绑定:
     <el-input v-model="select_word" placeholder="筛选关键词" ref="input" class="handle-input mr10"></el-input>
