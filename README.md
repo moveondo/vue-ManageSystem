@@ -424,6 +424,38 @@
              })
 ```
 
+### 12,更新时所有字段值不能为空 ### 
+```
+    UpdateData(params,ProductId){
+                let self = this;
+                for (var i = 0; i < params.length; i++) {
+                     if(params[i].maxValue=="" || params[i].minValue=="" || params[i].attributeValue==""){
+                         this.$message.error('所有字段都不能为空，请检查！');
+                         return false;
+                     }
+                }
+                self.$axios.post(self.url, params).then((res) => {
+                    this.$message.success('更新成功！');
+                     this.$router.push({ path: 'productsiglelist',query: { productId: ProductId }});
+                }).catch(function(err){
+                   console.log("调用失败2",err)
+                })
+   },
+```
+### 13,取消时所有字段值为空 ### 
+```
+    onCancel(){
+              let self = this;
+              for (var i = 0; i < self.params.length; i++) {
+                  self.params[i].maxValue="" ;
+                  self.params[i].minValue="" ;
+                  self.params[i].attributeValue="";
+              }
+
+            }
+```
+
+
 ## 其他注意事项 ##
 ### 一、如果我不想用到上面的某些组件呢，那我怎么在模板中删除掉不影响到其他功能呢？ ###
 
