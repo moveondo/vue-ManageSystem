@@ -366,6 +366,64 @@
   this.queryData(this.cur_page,this.select_word,this.picked);
 ```
 
+### 10,java后端数据返回值为map结构，进行转json ### 
+```
+ for(var key in self.arr) {
+     console.log( self.arr[key].attributeType);
+}
+这样可以取值
+```
+
+### 11,取值根绝后端数据取，更新后返回更新的数据 ### 
+```
+这样的话把需要传给后端的数据做成一个数组，然后进行双向绑定
+
+          <table class="table">
+             <thead>
+             <tr>
+                 <th></th>
+                 <th>属性值</th>
+                 <th>属性最大值</th>
+                 <th>属性最小值</th>
+             </tr>
+             </thead>
+             <tbody>
+               <tr v-for="(item, index) of params" ref="Validate">
+                 <td>{{Type[item.attributeType]}}</td>
+                 <td>
+                    <el-input v-model="item.attributeValue" ></el-input>
+                 </td>
+                 <td> <el-input v-model="item.maxValue"></el-input> </td>
+                 <td> <el-input v-model="item.minValue"></el-input></td>
+               </tr>
+
+             </tbody>
+           </table>
+           
+            self.$axios.get("http://172.20.15.22:5555/ccdproduct/product/queryProductById?productId="+Id).then((res) => {
+
+               self.arr=res.data.content.attributes;
+               //解析map格式
+               for(var key in self.arr)
+                  {
+                    self.params.push({"attributeType":self.arr[key].attributeType,"attributeValue":self.arr[key].attributeValue,"maxValue":self.arr[key].maxValue,"minValue":self.arr[key].minValue,"isactive":true,"productId":Id,"productAttributeId":self.arr[key].productAttributeId })
+                  }
+              
+      //增加字段可自动添加
+               let paramsLength=self.params.length;
+               for(let i=paramsLength+1;i<=self.Type0.length;i++){
+                  self.params.push({"attributeType":i,"attributeValue":"","maxValue":"","minValue":"","isactive":true,"productId":Id,"productAttributeId":"" })
+               }
+              
+              根据字段进行排序：
+              self.params.sort(function(a,b){
+              		return a.attributeType - b.attributeType;
+              })
+             }).catch(function(err){
+                console.log("调用失败0",err)
+             })
+```
+
 ## 其他注意事项 ##
 ### 一、如果我不想用到上面的某些组件呢，那我怎么在模板中删除掉不影响到其他功能呢？ ###
 
