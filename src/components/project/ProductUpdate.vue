@@ -2,15 +2,15 @@
     <div>
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-date"></i> 筛选条件</el-breadcrumb-item>
-                <el-breadcrumb-item>创建筛选条件</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-date"></i>产品</el-breadcrumb-item>
+                <el-breadcrumb-item>更新产品属性</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="form-box">
           <el-form ref="form" :model="form" label-width="80px">
               <el-form-item label="平台名称">
                    <el-select v-model="form.platformName" placeholder="请选择" > <!--@change="selectVal" -->
-                    <el-option v-for="(item, index) of Properties"  :label="item.platformName" :value="item.platformId"></el-option>
+                    <el-option v-for="(item, index) of Properties" :key="item.platformName"  :label="item.platformName" :value="item.platformId"></el-option>
                   </el-select>
               </el-form-item>
               <el-form-item label="产品名称">
@@ -42,15 +42,18 @@
     export default {
         data: function(){
             return {
+                // url:"http://172.20.15.22:5555/ccdproduct/product/queryProductById",
+                // url0:"http://172.20.15.22:5555/ccdproduct/platform/queryAllPlatformInfo",
+                // url1:"http://172.20.15.22:5555/ccdproduct/product/updateProductBaseInfo",
                 url:"/ccdproduct/product/queryProductById.htm",
                 url0:"/ccdproduct/platform/queryAllPlatformInfo.htm",
                 url1:"/ccdproduct/product/updateProductBaseInfo.htm",
                 itemList:Array,
                 Properties:[],
                 form: {
-                    platformName: '',
-                    productName: '',
-                    productUrl: '',
+                    platformName:'',
+                    productName:'',
+                    productUrl:'',
                     productPresentation:'',
                     display:''
                 }
@@ -96,7 +99,6 @@
 
                       var platformId = self.Properties[i].platformId;
                       var platformName = self.Properties[i].platformName;
-                    //  alert(buteName)
                        self.itemList[platformId] = platformName;
                     }
 
@@ -106,6 +108,7 @@
             },
             getDataQuery(Id){
               let self = this;
+              //self.$axios.get("http://172.20.15.22:5555/ccdproduct/product/queryProductById?productId="+Id).then((res) => {
               self.$axios.get("/ccdproduct/product/queryProductById.htm?productId="+Id).then((res) => {
                   this.form.productName=res.data.content.productName;
                   this.form.productUrl=res.data.content.productUrl;

@@ -44,29 +44,14 @@
                    </tr>
                    </thead>
                    <tbody>
-                     <tr :model="interestRate">
-                       <td>年化利率：</td>
-                       <td>{{ interestRate.attributeValue}}</td>
-                       <td>{{ interestRate.maxValue}} </td>
-                       <td>{{ interestRate.minValue}} </td>
-                     </tr>
-                     <tr :model="loanPeriod">
-                       <td>借款期限：</td>
-                       <td>{{ loanPeriod.attributeValue}}</td>
-                       <td>{{ loanPeriod.maxValue}} </td>
-                       <td>{{ loanPeriod.minValue}} </td>
-                     </tr>
-                     <tr :model="quota">
-                       <td>额  度：</td>
-                       <td>{{ quota.attributeValue}}</td>
-                       <td>{{ quota.maxValue}} </td>
-                       <td>{{ quota.minValue}} </td>
-                     </tr>
-                     <tr :model="loanTime">
-                       <td>放款时长：</td>
-                       <td>{{ loanTime.attributeValue}}</td>
-                       <td>{{ loanTime.maxValue}} </td>
-                       <td>{{ loanTime.minValue}} </td>
+                     <tr v-for="(item, index) of params" >
+                       <td>{{Type[item.attributeType]}}</td>
+                       <td>
+                         {{item.attributeValue}}
+
+                       </td>
+                       <td> {{item.maxValue}}</td>
+                       <td> {{item.minValue}} </td>
                      </tr>
                    </tbody>
                  </table>
@@ -85,49 +70,51 @@
     export default {
         data: function(){
             return {
+              //url0:"http://172.20.15.22:5555/ccdproduct/product/queryAllProductAttributeType",
+              url0:"/ccdproduct/product/queryAllProductAttributeType.htm",
+              arr:[],
+              params:[],
+              Properties:[],
+              Type:[],
                 form: {
                     platformName: '',
                     productName: '',
                     IsDisplay: '',
                     productUrl:'',
                     productPresentation:'',
-                },
-                interestRate:{
-                  attributeValue:'',
-                  maxValue:'',
-                  minValue:''
-                },
-                loanPeriod:{
-                  attributeValue:'',
-                  maxValue:'',
-                  minValue:''
-                },
-                quota:{
-                  attributeValue:'',
-                  maxValue:'',
-                  minValue:''
-                },
-                loanTime:{
-                  attributeValue:'',
-                  maxValue:'',
-                  minValue:''
                 }
             }
         },
         created(){
-          let Id=this.$route.query.productId;
-           this.getData(Id);
+            this.getQuery();
+           let Id=this.$route.query.productId;
+          //  this.getData(Id);
         },
         methods: {
+          getQuery(){
+             let self = this;
+             self.$axios.post(self.url0).then((res) => {
+                 self.Properties=res.data.content;
+                 let TypeLength=self.Properties.length;
+                 for (let i = 0; i < TypeLength; i++) {
+                   self.Type[self.Properties[i].attributeTypeId]=self.Properties[i].attributeName;
+                 };
+              // console.log(self.Type[0]);
+              let Id=this.$route.query.productId;
+               this.getData(Id);
+            });
+
+          },
             getData(Id){
                 let self = this;
                 self.$axios.get("/ccdproduct/product/queryProductById.htm?productId="+Id).then((res) => {
+                //self.$axios.get("http://172.20.15.22:5555/ccdproduct/product/queryProductById?productId="+Id).then((res) => {
                      let IsDisplay=res.data.content.isDisplay;
 
                        if(IsDisplay==true){  this.form.IsDisplay='是';}
                        else if(IsDisplay==false) { this.form.IsDisplay='否'; }
 
-                       console.log(IsDisplay,this.form.IsDisplay);
+                       //console.log(IsDisplay,this.form.IsDisplay);
                        this.form.platformName=res.data.content.platformName;
                        this.form.productName=res.data.content.productName;
                        this.form.productName=res.data.content.productName;
@@ -135,35 +122,15 @@
                        this.form.productPresentation=res.data.content.productPresentation;
                        this.form.Id=Id;
 
-                       let  AttriButes=res.data.content.attributes;
-                       //利率
-                       if(AttriButes && res.data.content.attributes.interestRate){
-                         this.interestRate.attributeValue=res.data.content.attributes.interestRate.attributeValue;
-                         this.interestRate.maxValue=res.data.content.attributes.interestRate.maxValue;
-                         this.interestRate.minValue=res.data.content.attributes.interestRate.minValue;
-                       }
-
-                       //借款期限
-                       if(AttriButes && res.data.content.attributes.loanPeriod){
-                         this.loanPeriod.attributeValue=res.data.content.attributes.loanPeriod.attributeValue;
-                         this.loanPeriod.maxValue=res.data.content.attributes.loanPeriod.maxValue;
-                         this.loanPeriod.minValue=res.data.content.attributes.loanPeriod.minValue;
-                       }
-
-                       //额度
-                       if(AttriButes && res.data.content.attributes.quota){
-                         this.quota.attributeValue=res.data.content.attributes.quota.attributeValue;
-                         this.quota.maxValue=res.data.content.attributes.quota.maxValue;
-                         this.quota.minValue=res.data.content.attributes.quota.minValue;
-                       }
-
-                       //放款时长
-                       if(AttriButes && res.data.content.attributes.loanTime){
-                         this.loanTime.attributeValue=res.data.content.attributes.loanTime.attributeValue;
-                         this.loanTime.maxValue=res.data.content.attributes.loanTime.maxValue;
-                         this.loanTime.minValue=res.data.content.attributes.loanTime.minValue;
-                       }
-
+                       self.arr=res.data.content.attributes;
+                       for(var key in self.arr)
+                          {
+                            //console.log(key+":"+self.arr[key].attributeType);
+                            self.params.push({"attributeType":self.arr[key].attributeType,"attributeValue":self.arr[key].attributeValue,"maxValue":self.arr[key].maxValue,"minValue":self.arr[key].minValue,"isactive":true,"productId":Id,"productAttributeId":self.arr[key].productAttributeId })
+                          }
+                          self.params.sort(function(a,b){
+                         		return a.attributeType - b.attributeType;
+                         })
                 })
             },
             goTable(){

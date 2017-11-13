@@ -13,27 +13,24 @@
               </el-form-item>
               <el-form-item  label="筛选属性">
                 <el-select v-model="form.selected" placeholder="请选择">
-                  <el-option v-for="(item, index) of Properties"  :label="item.attributeName" :value="item.attributeTypeId"></el-option>
+                  <el-option v-for="(item, index) of Properties" :key="item.attributeName" :label="item.attributeName" :value="item.attributeTypeId"></el-option>
                 </el-select>
                </el-form-item>
-
-                <el-form-item label="筛选字段">
-                    <el-select v-model="form.fields" placeholder="请选择">
-                        <el-option key="bbk" label="属性值" value="attribute_value"> </el-option>
-                        <el-option key="xtc" label="最大值" value="max_value"> </el-option>
-                        <el-option key="xtc" label="最小值" value="min_value"> </el-option>
-                    </el-select>
+               <el-form-item label="筛选字段">
+                   <el-select v-model="form.fields" placeholder="请选择">
+                     <el-option v-for="(item, index) of fieldsValue" :key="item.lable" :label="item.lable" :value="item.value"></el-option>
+                   </el-select>
                 </el-form-item>
                 <el-form-item label="排序类型">
                     <el-select v-model="form.sort" placeholder="请选择">
-                        <el-option key="bbk" label="正序" value="1"> </el-option>
-                        <el-option key="xtc" label="倒序" value="2"> </el-option>
+                        <el-option key="bbk" label="正序" :value="1"> </el-option>
+                        <el-option key="xtc" label="倒序" :value="2"> </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="是否在客户端展示">
                     <el-select v-model="form.client" placeholder="请选择">
-                        <el-option key="xtc" label="是" value="true"> </el-option>
-                        <el-option key="xtc" label="否" value="false"> </el-option>
+                        <el-option key="xtc" label="是" :value="true"> </el-option>
+                        <el-option key="xtc" label="否" :value="false"> </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item>
@@ -49,8 +46,10 @@
     export default {
         data: function(){
             return {
-                url:"/ccdproduct/productFiltrate/saveProductFiltrate.htm",
-                url0:"/ccdproduct/product/queryAllProductAttributeType.htm",
+                 url:"/ccdproduct/productFiltrate/saveProductFiltrate.htm",
+                 url0:"/ccdproduct/product/queryAllProductAttributeType.htm",
+                // url:"http://172.20.15.22:5555/ccdproduct/productFiltrate/saveProductFiltrate",
+                 //url0:"http://172.20.15.22:5555/ccdproduct/product/queryAllProductAttributeType",
                 Properties:[],
                 form: {
                     name: '',
@@ -58,7 +57,19 @@
                     fields: '',
                     sort:'',
                     client:''
-                }
+                },
+                fieldsValue:[
+                 {
+                   lable:'属性值',
+                   value:'attribute_value'
+                 },{
+                   lable:'最大值',
+                   value:'max_value'
+                 },{
+                   lable:'最小值',
+                   value:'min_value'
+                 }
+               ]
             }
         },
         created(){
@@ -79,9 +90,9 @@
             },
             getDataQuery(){
                 let self = this;
-                self.$axios.post(self.url0,{}).then((res) => {
+                self.$axios.post(self.url0).then((res) => {
                     self.Properties=res.data.content;
-                    console.log(this.Properties);
+                    //console.log(this.Properties);
                 })
             },
             getData(Name,Selected,Fields,Sort,Client){

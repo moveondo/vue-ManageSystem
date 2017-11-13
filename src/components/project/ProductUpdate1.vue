@@ -19,34 +19,19 @@
              </tr>
              </thead>
              <tbody>
-               <tr :model="interestRate">
-                 <td>年化利率：</td>
-                 <td>  <el-input v-model="interestRate.attributeValue"></el-input> </td>
-                 <td> <el-input v-model="interestRate.maxValue"></el-input> </td>
-                 <td> <el-input v-model="interestRate.minValue"></el-input> </td>
+               <tr v-for="(item, index) of params">
+                 <td>{{Type[item.attributeType]}}</td>
+                 <td>
+                    <el-input v-model="item.attributeValue" ></el-input>
+                 </td>
+                 <td> <el-input v-model="item.maxValue"></el-input> </td>
+                 <td> <el-input v-model="item.minValue"></el-input></td>
                </tr>
-               <tr :model="loanPeriod">
-                 <td>借款期限：</td>
-                 <td> <el-input v-model="loanPeriod.attributeValue"></el-input></td>
-                 <td> <el-input v-model="loanPeriod.maxValue"></el-input></td>
-                 <td> <el-input v-model="loanPeriod.minValue"></el-input></td>
-               </tr>
-               <tr :model="quota">
-                 <td>额  度：</td>
-                 <td> <el-input v-model="quota.attributeValue"></el-input></td>
-                 <td> <el-input v-model="quota.maxValue"></el-input> </td>
-                 <td> <el-input v-model=" quota.minValue"></el-input> </td>
-               </tr>
-               <tr :model="loanTime">
-                 <td>放款时长：</td>
-                 <td> <el-input v-model="loanTime.attributeValue"></el-input></td>
-                 <td> <el-input v-model="loanTime.maxValue"></el-input> </td>
-                 <td> <el-input v-model="loanTime.minValue"></el-input></td>
-               </tr>
+
              </tbody>
            </table>
            <div class="btn">
-             <el-button type="primary" @click="onUpdate">更新</el-button>
+             <el-button type="primary" @click="onUpdate()">更新</el-button>
              <el-button  @click="onCancel">取消</el-button>
            </div>
           </div>
@@ -58,92 +43,85 @@
     export default {
         data: function(){
             return {
+                // url:"http://172.20.15.22:5555/ccdproduct/product/saveOrUpdateProductAttributes",
+                // url0:"http://172.20.15.22:5555/ccdproduct/product/queryAllProductAttributeType",
                 url:"/ccdproduct/product/saveOrUpdateProductAttributes.htm",
+                url0:"/ccdproduct/product/queryAllProductAttributeType.htm",
+
                 Properties:[],
-                interestRate:{
-                  attributeValue:'',
-                  maxValue:'',
-                  minValue:''
-                },
-                loanPeriod:{
-                  attributeValue:'',
-                  maxValue:'',
-                  minValue:''
-                },
-                quota:{
-                  attributeValue:'',
-                  maxValue:'',
-                  minValue:''
-                },
-                loanTime:{
-                  attributeValue:'',
-                  maxValue:'',
-                  minValue:''
-                }
+                Type:[],
+                Type0:[],
+                TypeCode:[],
+                arr:[],
+                params:[],
+
             }
         },
         created(){
 
             let Id=this.$route.query.productId;
-            this.getDataQuery(Id);
+            this.getQuery(Id);
+            //this.getDataQuery(Id);
+
         },
         methods: {
+           getQuery(Id){
+              let self = this;
+              self.$axios.post(self.url0).then((res) => {
+                  self.Properties=res.data.content;
+                  let TypeLength=self.Properties.length;
+                  for (let i = 0; i < TypeLength; i++) {
+                    self.Type[self.Properties[i].attributeTypeId]=self.Properties[i].attributeName;
+                    self.Type0[i]=self.Properties[i].attributeTypeId;
+                    self.TypeCode[i]=self.Properties[i].attributeCode;
+
+                  };
+                    let Id=this.$route.query.productId;
+                    this.getDataQuery(Id);
+                //console.log(self.TypeCode[0]);
+              })
+           },
+           getDataQuery(Id){
+             let self = this;
+             self.$axios.get("/ccdproduct/product/queryProductById.htm?productId="+Id).then((res) => {
+          //   self.$axios.get("http://172.20.15.22:5555/ccdproduct/product/queryProductById?productId="+Id).then((res) => {
+
+               self.arr=res.data.content.attributes;
+               for(var key in self.arr)
+                  {
+                    self.params.push({"attributeType":self.arr[key].attributeType,"attributeValue":self.arr[key].attributeValue,"maxValue":self.arr[key].maxValue,"minValue":self.arr[key].minValue,"isactive":true,"productId":Id,"productAttributeId":self.arr[key].productAttributeId })
+                  }
+              // console.log(self.params[0].attributeType);
+               //console.log(self.Type0);
+
+               //console.log("长度："+self.params.length);
+               let paramsLength=self.params.length;
+               for(let i=paramsLength+1;i<=self.Type0.length;i++){
+                  self.params.push({"attributeType":i,"attributeValue":"","maxValue":"","minValue":"","isactive":true,"productId":Id,"productAttributeId":"" })
+               }
+               //self.params.sort();
+               self.params.sort(function(a,b){
+              		return a.attributeType - b.attributeType;
+              })
+
+
+
+             }).catch(function(err){
+                console.log("调用失败0",err)
+             })
+           },
             onUpdate() {
               var ProductId=this.$route.query.productId;
-
-                let RateA=this.interestRate.attributeValue;
-                let RateMax=this.interestRate.maxValue;
-                let RateMin=this.interestRate.minValue;
-
-                let loanPeriodA=this.loanPeriod.attributeValue;
-                let loanPeriodMax=this.loanPeriod.maxValue;
-                let loanPeriodMin=this.loanPeriod.minValue;
-
-                let quotaA=this.quota.attributeValue;
-                let quotaMax=this.quota.maxValue;
-                let quotaMin=this.quota.minValue;
-
-                let loanTimeA=this.loanTime.attributeValue;
-                let loanTimeMax=this.loanTime.maxValue;
-                let loanTimeMin=this.loanTime.minValue;
-
-                if(RateA=='' || RateMax=='' || RateMin=='') {
-                  this.$message.error('请填写年化利率属性值/最大值/最小值');
-                  return false;
-                }else if (loanPeriodA=='' || loanPeriodMax=='' || loanPeriodMin=='' ){
-                  this.$message.error('请填写借款期限属性值/最大值/最小值');
-                  return false;
-                }else if (quotaA=='' || quotaMax=='' || quotaMin==''){
-                  this.$message.error('请填写额度属性值/最大值/最小值');
-                  return false;
-                }else if (loanTimeA=='' || loanTimeMax=='' || loanTimeMin==''){
-                  this.$message.error('请填写放款时长属性值/最大值/最小值');
-                  return false;
-                }
-
-                let params=[
-                  {"attributeType":1,"attributeValue":RateA,"maxValue":RateMax,"minValue":RateMin,"isactive":true,"productId":ProductId },
-                  {"attributeType":3,"attributeValue":loanPeriodA,"maxValue":loanPeriodMax,"minValue":loanPeriodMin,"isactive":true,"productId":ProductId },
-                  {"attributeType":2,"attributeValue":quotaA,"maxValue":quotaMax,"minValue":quotaMin,"isactive":true,"productId":ProductId },
-                  {"attributeType":4,"attributeValue":loanTimeA,"maxValue":loanTimeMax,"minValue":loanTimeMin,"isactive":true,"productId":ProductId }
-                ]
-                 this.UpdateData(params,ProductId);
-            },
-
-            getDataQuery(Id){
-              let self = this;
-              self.$axios.get("/ccdproduct/product/queryProductById.htm?productId="+Id).then((res) => {
-                  this.interestRate=res.data.content.attributes.interestRate;
-                  this.loanPeriod=res.data.content.attributes.loanPeriod;
-                  this.quota=res.data.content.attributes.quota;
-                  this.loanTime=res.data.content.attributes.loanTime;
-
-              }).catch(function(err){
-                 console.log("调用失败0",err)
-              })
+                 this.UpdateData(this.params,ProductId);
             },
             UpdateData(params,ProductId){
                 let self = this;
+                for (var i = 0; i < params.length; i++) {
+                     if(params[i].maxValue=="" || params[i].minValue=="" || params[i].attributeValue==""){
+                         this.$message.error('所有字段都不能为空，请检查！');
+                         return false;
+                     }
+                }
                 self.$axios.post(self.url, params).then((res) => {
                     this.$message.success('更新成功！');
                      this.$router.push({ path: 'productsiglelist',query: { productId: ProductId }});
@@ -152,18 +130,12 @@
                 })
             },
             onCancel(){
-              this.interestRate.attributeValue='';
-              this.interestRate.maxValue='';
-              this.interestRate.minValue='';
-              this.loanPeriod.attributeValue='';
-              this.loanPeriod.maxValue='';
-              this.loanPeriod.minValue='';
-              this.quota.attributeValue='';
-              this.quota.maxValue='';
-              this.quota.minValue='';
-              this.loanTime.attributeValue='';
-              this.loanTime.maxValue='';
-              this.loanTime.minValue='';
+              let self = this;
+              for (var i = 0; i < self.params.length; i++) {
+                  self.params[i].maxValue="" ;
+                  self.params[i].minValue="" ;
+                  self.params[i].attributeValue="";
+              }
 
             }
         }

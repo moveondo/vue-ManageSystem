@@ -2,15 +2,15 @@
     <div>
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-date"></i> 平台</el-breadcrumb-item>
-                <el-breadcrumb-item>创建平台</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-date"></i> 产品</el-breadcrumb-item>
+                <el-breadcrumb-item>创建产品</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="form-box">
             <el-form ref="form" :model="form" label-width="80px">
                 <el-form-item label="平台名称">
                     <el-select v-model="form.platformName" placeholder="请选择">
-                      <el-option v-for="(item, index) of Properties"  :label="item.platformName" :value="item.platformId"></el-option>
+                      <el-option v-for="(item, index) of Properties"  :key="item.platformName"  :label="item.platformName" :value="item.platformId"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="产品名称">
@@ -44,6 +44,8 @@
             return {
                 url:"/ccdproduct/product/saveProductBaseInfo.htm",
                 url0:"/ccdproduct/platform/queryAllPlatformInfo.htm",
+                // url:"http://172.20.15.22:5555/ccdproduct/product/saveProductBaseInfo",
+                // url0:"http://172.20.15.22:5555/ccdproduct/platform/queryAllPlatformInfo",
                 form: {
                     platformName: '',
                     productName: '',

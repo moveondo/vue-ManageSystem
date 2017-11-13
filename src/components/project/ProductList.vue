@@ -16,8 +16,8 @@
             产品名称：<el-input v-model="select_word0"  placeholder="筛选产品" ref="product" class="handle-input mr10"></el-input>
             <el-button type="primary" icon="search" @click="search">搜索</el-button>
             <span class="radio">
-              <input type="radio" id="yes" value="true"  v-model="picked" @click="Front"><label for="yes">在客户端显示</label>
-              <input type="radio" id="no"  value="false" v-model="picked" @click="Front"><label for="no">不在客户端显示</label>
+              <input type="radio" id="yes" :value="true"  v-model="picked" @click="Front"><label for="yes">在客户端显示</label>
+              <input type="radio" id="no"  :value="false" v-model="picked" @click="Front"><label for="no">不在客户端显示</label>
             </span>
 
         </div>
@@ -44,11 +44,19 @@
             </el-table-column>
         </el-table>
         <div class="pagination">
-            <el-pagination
+            <!-- <el-pagination
                     @current-change ="handleCurrentChange"
                     layout="prev, pager, next"
                     :total="1000">
-            </el-pagination>
+            </el-pagination> -->
+            <el-pagination
+                 @size-change="handleSizeChange"
+                 @current-change="handleCurrentChange"
+                 :current-page.sync="currentPage1"
+                 :page-size="pageSize"
+                 layout="total, prev, pager, next"
+                 :total="totalNum">
+           </el-pagination>
         </div>
     </div>
 </template>
@@ -58,6 +66,7 @@
         data() {
             return {
                 url:"/ccdproduct/product/queryProductBaseInfo.htm",
+                //url:"http://172.20.15.22:5555/ccdproduct/product/queryProductBaseInfo",
                 tableData: [],
                 cur_page: 1,
                 multipleSelection: [],
@@ -66,11 +75,15 @@
                 select_word0: '',
                 del_list: [],
                 is_search: false,
-                picked:''
+                picked:'',
+                currentPage1:1,
+                totalNum:0,
+                pageSize:0,
             }
         },
         created(){
-            this.getData();
+            //this.getData();
+            this.queryData(this.cur_page,this.select_word,this.select_word0,this.picked);
         },
         computed: {
             data(){
@@ -87,7 +100,6 @@
                     }
                     if(!is_del){
                             return d;
-
                     }
                 })
             },
@@ -98,39 +110,36 @@
                //把每一行的索引放进row
                row.index = (index+1)+(this.cur_page-1)*20;
            },
+           handleSizeChange(val) {
+
+            console.log(`每页 ${val} 条`);
+          },
             handleCurrentChange(val){
                 this.cur_page = val;
-                this.getData();
+                this.queryData(this.cur_page,this.select_word,this.select_word0,this.picked);
             },
-            getData(){
+
+            queryData(page,platValue,productValue,Pick){
                 let self = this;
-                self.$axios.post(self.url, {startPage:self.cur_page}).then((res) => {
+                self.$axios.post(self.url, {"startPage":page,"platformName":platValue,"productName":productValue,"display":Pick}).then((res) => {
                     self.tableData = res.data.content.list;
-                })
-            },
-            queryData(platValue,productValue){
-                let self = this;
-                self.$axios.post(self.url, {"platformName":platValue,"productName":productValue}).then((res) => {
-                    self.tableData = res.data.content.list;
+                    self.totalNum=res.data.content.totalCount;
+                    self.pageSize=res.data.content.pageSize;
 
                 })
             },
-            queryDataFront(Pick){
-                let self = this;
-                self.$axios.post(self.url, {display:Pick}).then((res) => {
-                    self.tableData = res.data.content.list;
-                })
-
-            },
+        
             search(){
                 this.is_search = true;
-                let platValue=this.$refs.flat.value;
-                let productValue=this.$refs.product.value;
-                this.queryData(platValue,productValue);
+                // let platValue=this.$refs.flat.value;
+                // let productValue=this.$refs.product.value;
+                // this.queryData(platValue,productValue);
+                  this.queryData(this.cur_page,this.select_word,this.select_word0,this.picked);
             },
             Front(){
-                let Pick=this.picked;
-                this.queryDataFront(Pick);
+                // let Pick=this.picked;
+                // this.queryDataFront(Pick);
+                this.queryData(this.cur_page,this.select_word,this.select_word0,this.picked);
             },
             index(row, column){
                 return row.index;
@@ -147,7 +156,7 @@
                 this.$router.push({ path: 'productsiglelist', query: { productId: row.id }});
             },
             handleEdit(index, row) {
-                this.$message('编辑第'+(index+1)+'行');
+                //this.$message('编辑第'+(index+1)+'行');
                 this.$router.push({ path: 'productupdate', query: { productId: row.id }});
             },
             // handleDelete(index, row) {

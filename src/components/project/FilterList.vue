@@ -42,11 +42,19 @@
      </table>
 
         <div class="pagination">
-            <el-pagination
+            <!-- <el-pagination
                     @current-change ="handleCurrentChange"
                     layout="prev, pager, next"
                     :total="1000">
-            </el-pagination>
+            </el-pagination> -->
+            <el-pagination
+                 @size-change="handleSizeChange"
+                 @current-change="handleCurrentChange"
+                 :current-page.sync="currentPage1"
+                 :page-size="pageSize"
+                 layout="total, prev, pager, next"
+                 :total="totalNum">
+           </el-pagination>
         </div>
     </div>
 </template>
@@ -55,10 +63,14 @@
     export default {
         data() {
             return {
+                //url0:"http://172.20.15.22:5555/ccdproduct/product/queryAllProductAttributeType",
                 url0:"/ccdproduct/product/queryAllProductAttributeType.htm",
                 tableData: [],
                 itemList:Array,
                 cur_page: 1,
+                currentPage1:1,
+                totalNum:0,
+                pageSize:0,
             }
         },
         created(){
@@ -73,11 +85,18 @@
               this.cur_page = val;
               this.getData();
           },
+          handleSizeChange(val) {
+
+           console.log(`每页 ${val} 条`);
+         },
           getData(){
               let self = this;
               self.$axios.post("/ccdproduct/productFiltrate/queryPlatform.htm",
+              //self.$axios.post("http://172.20.15.22:5555/ccdproduct/productFiltrate/queryPlatform",
                {startPage:self.cur_page}).then((res) => {
                   self.tableData = res.data.content.list;
+                  self.totalNum=res.data.content.totalCount;
+                  self.pageSize=res.data.content.pageSize;
 
               }).catch(function(err){
                  console.log("调用失败",err)
@@ -85,7 +104,7 @@
           },
           getDataQuery(){
               let self = this;
-              self.$axios.post(self.url0, {}).then((res) => {
+              self.$axios.post(self.url0).then((res) => {
                   self.Content = res.data.content;
                  //alert(self.Content.length)
                   for(var i= 0,len=self.Content.length;i<len;i++){
@@ -103,11 +122,11 @@
 
 
           handleRead(index,id){
-            this.$message('查看'+(index+1)+'行');
+            //this.$message('查看'+(index+1)+'行');
             this.$router.push({ path: 'filtersiglelist', query: { id: id }});
           },
           handleEdit(index, id) {
-              this.$message('编辑第'+(index+1)+'行');
+              //this.$message('编辑第'+(index+1)+'行');
               this.$router.push({ path: 'filterupdate',query: { platformId: id }});
           },
           handleDelete(index, row) {
