@@ -7,8 +7,11 @@
                 <el-breadcrumb-item>业务处理</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-         <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" >
-             <el-table-column  prop="index"  label="序号" width="100px">  </el-table-column>
+         <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName"  v-loading="loading"
+    element-loading-text="拼命加载中"
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)">
+             <el-table-column type="index" :index="indexMethod" prop="index"  label="序号" width="100px">  </el-table-column>
              <el-table-column prop="id" label="标的id" ></el-table-column>
             <el-table-column prop="borrowerId" label="借款人id" ></el-table-column>
             <el-table-column prop="amount" label=" 借款金额"  ></el-table-column>
@@ -17,7 +20,7 @@
             <el-table-column prop="termUnit" label=" 期的单位"  ></el-table-column>
 
              <el-table-column  label="标的状态"  >
-             <template scope="scope">
+             <template slot-scope="scope">
                <span v-if="scope.row.status==70 || scope.row.status==72 " type="text">提现失败</span>
                <span v-else-if="scope.row.status==54 || scope.row.status==41 " type="text">转账失败</span>
                <span v-else-if="scope.row.status==53" type="text">生成债务债权失败</span>
@@ -26,11 +29,21 @@
             </el-table-column>
             <el-table-column prop="fullBidTime"   :formatter="timetrans"   label="满标时间"  ></el-table-column>
             <el-table-column  label="资料审核">
-             <template scope="scope">
+             <template slot-scope="scope">
                 <el-button size="small" type="primary"  @click="Retry(scope.$index, scope.row)">重试</el-button>   
              </template>       
             </el-table-column>
         </el-table>
+        <div class="pagination">
+            <el-pagination
+                 @size-change="handleSizeChange"
+                 @current-change="handleCurrentChange"
+                 :current-page.sync="currentPage1"
+                 :page-size="pageSize"
+                 layout="total, prev, pager, next"
+                 :total="totalNum">
+           </el-pagination>
+        </div>
            <dialogEE v-bind:dialogVisible="dialogVisible" ></dialogEE>
     
 
@@ -49,7 +62,12 @@
                 url:"/backend/IListingService/getLoanFailedRetryListingList",   
                 url1:"/backend/IListingService/loanFailedRetry",              
                 tableData: [], 
-                dialogVisible: false,        
+                dialogVisible: false, 
+                 cur_page: 1, 
+                currentPage1:1,
+                totalNum:0,
+                pageSize:20, 
+                loading:false     
             }
         },
         components: {
@@ -57,14 +75,8 @@
             'verifyPermission':verifyPermission,
         },
         created(){
-        //    var CheckFunction =this.$store.state.FunctionUrl;           
-        //    var Path=(this.$route.path).replace("/","");;
-        //     if(CheckFunction.indexOf(Path)=="-1"){
-        //         this.dialogVisible=true;
-        //         return false;
-        //     }
 
-             this.GetqueryData();
+              this.GetqueryData(this.cur_page,this.pageSize);
         },
         computed: {
             data(){
@@ -82,16 +94,36 @@
           
         },
         methods: {
-           tableRowClassName(row, index) {
-               //把每一行的索引放进row
-               row.index = (index+1);
+          indexMethod(index) {
+              return (index+1)+(this.cur_page-1)*this.pageSize;
            },
+            tableRowClassName(row, index) {
+               //把每一行的索引放进row
+               row.index = (index+1)+(this.cur_page-1)*this.pageSize;
+           }, 
+           handleSizeChange(val) {
+
+            console.log(`每页 ${val} 条`);
+          },
+            handleCurrentChange(val){
+                this.cur_page = val;
+                this.GetqueryData(this.cur_page,this.pageSize);
+            },
           
-           GetqueryData(){
+           GetqueryData(cur_page,pageSize){
                 let self = this;
-                 self.$axios.post(self.url).then((res) => {
+                  let axiosDate = new Date();
+                self.loading=true;
+                 self.$axios.post(self.url, {"startPage":cur_page,"pageSize":pageSize}).then((res) => {
                    if(res.data.result=="0"){
-                         self.tableData =res.data.content;
+                          let oDate = new Date()
+                        let time = oDate.getTime() - axiosDate.getTime()
+                        if (time < 500) time = 500
+                        setTimeout(() => {
+                          self.loading=false;
+                        }, time)
+                         self.tableData =res.data.content.list;
+                         self.totalNum=res.data.content.totalCount;
                                                                                                      
                    }else if( res.data.result=='-99' || res.data.result=='-999'){
                             self.$message.error(res.data.resultMessage);

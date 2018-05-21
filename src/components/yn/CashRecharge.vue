@@ -13,13 +13,14 @@
                     <el-select v-model="form.userId" placeholder="请选择">
                         <el-option key="bbk" label="投资账户" :value="5"> </el-option>
                         <el-option key="xtc" label="市场营销账户" :value="6"> </el-option>
+                        <el-option key="xty" label="第三方手续费账户" :value="13"> </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="充值金额">
                     <el-input v-model="form.rechargeAmount"></el-input>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="onSubmit">充值</el-button>
+                    <el-button type="primary" v-bind:disabled="isActive"  @click="onSubmit">充值</el-button>
                     <el-button @click="onCancel">取消</el-button>
                 </el-form-item>
             </el-form>
@@ -37,6 +38,7 @@
                // url:"/api/backend/capital/recharge",
                url:"/backend/capital/recharge",
                  dialogVisible: false,
+                  isActive:false,
                 form: {
                     userId: '',
                     rechargeAmount: '',
@@ -57,14 +59,16 @@
         },
         methods: {
             onSubmit() {
-                let userId=this.form.userId;
-                let rechargeAmount=this.form.rechargeAmount;
+                 let self=this;
+                let userId=self.form.userId;
+                let rechargeAmount=self.form.rechargeAmount;
         
                 if(userId=='' || rechargeAmount=='') {
-                  this.$message.error('所有字段不能为空');
+                  self.$message.error('所有字段不能为空');
                   return false;
                 }
-                this.getData(userId,rechargeAmount);
+                 self.isActive=true;
+                self.getData(userId,rechargeAmount);
                 
 
             },
@@ -72,16 +76,20 @@
                 let self = this;
                 self.$axios.post(self.url, {"userId":userId,"rechargeAmount":rechargeAmount}).then((res) => {
                  if(res.data.result=="0"){
-                       this.$message.success('充值成功');
-                        this.form.userId='';
-                         this.form.rechargeAmount='';
+                       self.$message.success('充值成功');
+                        self.form.userId='';
+                         self.form.rechargeAmount='';
+                         self.isActive=false;
 
                  }else if (res.data.result=="-1"){
-                   this.$message.error(res.data.resultMessage);
+                   self.$message.error(res.data.resultMessage);
+                   self.isActive=false;
                  }else if( res.data.result=='-99' || res.data.result=='-999'){
                             self.$message.error(res.data.resultMessage);
+                            self.isActive=false;
                  }else{
                     self.$message.error(res.data.resultMessage);
+                    self.isActive=false;
                  }
                 
                    // this.$router.push({ path: 'productcreate1',query: { "productId": productId }});

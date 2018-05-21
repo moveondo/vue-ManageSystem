@@ -9,7 +9,7 @@
        
         data: function () {
           return {
-           //url99:"http://172.20.14.33:8086/backend/IUserAuthService/verifyPermission",
+           //url99:"172.20.14.33:8080/backend/IUserAuthService/verifyPermission",
            url99:"/backend/IUserAuthService/verifyPermission",
           };
         },

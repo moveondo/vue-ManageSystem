@@ -13,10 +13,11 @@
             支付银行交易编号：<el-input v-model="bankTradeCode"  placeholder="筛选银行交易编号"  class="handle-input mr10"></el-input>
             <el-button type="primary" icon="search" @click="search">搜索</el-button>
         </div>
+         <!-- @current-change="toggleRowExpansion" -->
          <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" :row-key="getRowKeys"
-                :expand-row-keys="expands" @current-change="toggleRowExpansion" >
+                :expand-row-keys="expands" @row-click="rowClik" > 
             <el-table-column type="expand" >
-                <template scope="props">
+                <template slot-scope="props">
                     <div  class="title">主流水</div>            
                     <el-table :data="acctWastebookDtos" border style="width: 100%" >
                      <el-table-column prop="tradeflowNo" label="交易单号" ></el-table-column>
@@ -56,7 +57,7 @@
 
                 </template>
             </el-table-column>
-             <el-table-column  prop="index"  label="序号" width="100px">  </el-table-column>
+             <!-- <el-table-column  :index="indexMethod" label="序号" width="100px">  </el-table-column> -->
              <el-table-column prop="id" label="主键" ></el-table-column>
             <el-table-column prop="tradeType" label="交易类型" ></el-table-column>
             <el-table-column prop="tradeTypeName" label="交易类型名称"  ></el-table-column>
@@ -92,8 +93,8 @@
     export default {
         data() {
             return {
-               //url:"/api/backend/capital/queryTradeRecord",
-                url:"/backend/capital/queryTradeRecord",
+               url:"/backend/capital/queryTradeRecord",
+              //  url:"/backend/capital/queryTradeRecord",
                listingId:'',
                businessNo:'',
                bankTradeCode:'',
@@ -109,6 +110,7 @@
                dialogTableVisible: false,
                dialogVisible: false,       
                getRowKeys(row) {
+                //    console.log(row.businessNo)
                 return row.businessNo;
                },
                form: {
@@ -183,41 +185,60 @@
 
         },
         methods: {
+            indexMethod(index) {
+                return (index+1)+(this.cur_page-1)*this.pageSize;
+            },
+                rowClik(row){
+                    if(row.businessNo===this.expands[0]){
+                    this.expands=[];
+                    }
+                    else{
+                    this.expands=[];
+                    this.expands.push(row.businessNo);
+                     this.QueryBusinessNo(row.businessNo);
+                    }
+                },
            tableRowClassName(row, index) {
                //把每一行的索引放进row
                row.index = (index+1);
            },
            toggleRowExpansion(row){
-                this.QueryBusinessNo(row.businessNo);
-                this.expands = [];
+               console.log(row.businessNo);
+               this.expands = [];
                 this.expands.push(row.businessNo);  
+                this.QueryBusinessNo(row.businessNo);
+                
                
                         
            },   
            QueryBusinessNo(businessNo){
                 let self = this;
                
-
+                    self.GetDtos=[];
+                    self.AccDots=[];
+                    self.WasDtos=[];
                  self.$axios.get("/backend/capital/queryTradeDetail?businessNo="+businessNo).then((res) => {
                    if(res.data.result=="0"){
                          self.params =res.data.content;
-                         self.GetDtos=[];
-                         self.AccDots=[];
-                         self.WasDtos=[];
+                      
                          self.GetDtos=self.params.gatewayRecordDtos;
                          self.AccDots=self.params.acctWastebookDtos;//主流水
-                                   
-                         let Length=self.params.acctWastebookDtos.length;
-                  
-                         for(let i = 0;i< Length ;i++){
+                                                
+                         if(self.params.acctWastebookDtos !=null && self.params.acctWastebookDtos.length >0){
+                             console.log(self.params.acctWastebookDtos.length)
+                              let accLength=self.params.acctWastebookDtos.length;
+                            for(let i = 0;i< accLength ;i++){
                  
-                            let Length1=self.params.acctWastebookDtos[i].wastebookSubDtos.length;//流水明细
+                               let Length1=self.params.acctWastebookDtos[i].wastebookSubDtos.length;//流水明细
                             for(let j=0;j<Length1;j++){
                             
                                 self.WasDtos.push(self.params.acctWastebookDtos[i].wastebookSubDtos[j]);
                             }
   
-                         }                                                    
+                           } 
+                         }
+                  
+                                                                           
                    }else if( res.data.result=='-99' || res.data.result=='-999'){
                             self.$message.error(res.data.resultMessage);
                     }else{
@@ -320,9 +341,13 @@ display: inline-block;
       text-overflow:ellipsis;
        white-space: nowrap;
   }
+  
 </style>
 <style>
 .el-dialog{
     width: 70% !important;
 }
+.el-table__expand-icon{
+      display:none;
+  }
 </style>

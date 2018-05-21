@@ -12,7 +12,7 @@
                 <div class="login-btn">
                     <el-button type="primary" @click="submitForm('ruleForm')">登录(Masuk)</el-button>
                 </div>
-                <!-- <p style="font-size:12px;line-height:30px;color:#999;">Tips : 用户名和密码随便填。</p> -->
+                <!-- <p style="font-size:12px;line-height:30px;color:#999;">Tips : 用户名和密码随便填11。</p> -->
             </el-form>
         </div>
     </div>
@@ -23,6 +23,7 @@
         data: function(){
             return {
                 url:"/backend/ILoginService/login",
+                //url:"//172.20.14.33:8080/backend/ILoginService/login",
                 ruleForm: {
                     username: '',
                     password: ''
@@ -48,23 +49,26 @@
                 //     return false;
                 // }
                 self.$axios.post(self.url, {"mobile":mobile,"password":password,}).then((res) => {
-                    if(res.data.result==0 ){ 
-                        let ms_username=res.data.content.user.username;                                         
+                    if(res.data.result==0 ){
+                        let ms_username=res.data.content.user.username;
+                        let ms_mobile = res.data.content.user.mobile;
                         localStorage.setItem('ms_username',ms_username);
-                         
+                        localStorage.setItem('ms_mobile', ms_mobile);
+                        
+
                          var Length=res.data.content.functionList.length;
                          for(let i=0;i<Length;i++){
                             FunctionUrl.push(res.data.content.functionList[i].functionUrl);
                          }
-                                               
+
                           localStorage.setItem('ChangeFunction',FunctionUrl);
                           this.$store.commit('ChangeFunction', FunctionUrl);
-                        
-                         self.$router.push('/readme');            
+
+                         self.$router.push('/readme');
                     }else{
                         self.$message.error(res.data.resultMessage);
                     }
-                    
+
                 }).catch(function(err){
                 console.log("调用失败",err)
                 })
@@ -72,7 +76,7 @@
 
             },
             checkMobile(mobile){
-                          
+
                 if(!(/^\d{1,11}$/.test(mobile)) && mobile.length>="1"){
                     this.ruleForm.username="";
                     this.ruleForm.password="";
@@ -86,7 +90,7 @@
                     return false;
                 }
                 if((/^1[3|4|5|7|8][0-9]\d{4,8}$/.test(mobile)) && mobile.length=="11"){
-                   
+
                       return true;
                 }else{
                      this.ruleForm.username="";
@@ -94,7 +98,7 @@
                      this.$message.error('手机号码有误！');
                       return false;
                 }
-              
+
             }
 
         }

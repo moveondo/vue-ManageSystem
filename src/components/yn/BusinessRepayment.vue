@@ -19,7 +19,7 @@
                     <el-input v-model="form.userId"></el-input>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="onSubmit">手动还款</el-button>
+                    <el-button type="primary" v-bind:disabled="isActive" @click="onSubmit">手动还款</el-button>
                     <el-button @click="onCancel">取消</el-button>
                 </el-form-item>
             </el-form>
@@ -37,6 +37,7 @@ import dialogEE from './Dialog.vue';
                 //url:"http://172.20.15.48:8080/backend/IListingService/rollBackDebt",
                 url:"/backend/IListingService/rollBackDebt",
                  dialogVisible: false,
+                 isActive:false,
                 form: {
                     listingId: '',
                     debtId: '',
@@ -59,15 +60,17 @@ import dialogEE from './Dialog.vue';
         },
         methods: {
             onSubmit() {
-                let listingId=this.form.listingId;
-                let debtId=this.form.debtId;
-                let userId=this.form.userId;
+                let self=this;
+                let listingId=self.form.listingId;
+                let debtId=self.form.debtId;
+                let userId=self.form.userId;
         
                 if(listingId=='' || userId=='' || debtId=='') {
-                  this.$message.error('所有字段不能为空');
+                  self.$message.error('所有字段不能为空');
                   return false;
                 }
-                this.getData(listingId,debtId,userId);
+                 self.isActive=true;
+                self.getData(listingId,debtId,userId);
                 
 
             },
@@ -79,12 +82,15 @@ import dialogEE from './Dialog.vue';
                         this.form.listingId='';
                         this.form.userId='';
                         this.form.debtId='';
+                         self.isActive=false;
                  }else if (res.data.result=="-1"){
                    this.$message.error(res.data.resultMessage);
+                    self.isActive=false;
                  }else if( res.data.result=='-99' || res.data.result=='-999'){
                             self.$message.error(res.data.resultMessage);
                  }else{
                     self.$message.error(res.data.resultMessage);
+                     self.isActive=false;
                  }
                 
                    // this.$router.push({ path: 'productcreate1',query: { "productId": productId }});

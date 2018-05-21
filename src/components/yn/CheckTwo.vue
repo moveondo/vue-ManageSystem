@@ -6,30 +6,52 @@
                 <el-breadcrumb-item>审核列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
+        <div class="handle-box">     
+           <el-select v-model="region" placeholder="请选择">
+                        <el-option key="bbk" label="用户ID(ID pengguna)" value="1"></el-option>
+                        <el-option key="xtc" label="标的ID(daftar id)" value="2"></el-option>
+           </el-select>
+         <el-input v-model="userIdORphone"  placeholder="不可为空"  class="handle-input mr10"></el-input>
+         <el-button type="primary" icon="search" @click="search">搜索(Mencari)</el-button>
+        </div>
        <div class="first">二审列表</div>
-        <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable">
-            <el-table-column  prop="index"  label="序号"  width="150" >  </el-table-column>
+        <el-table :data="data"  v-loading="loading"
+    element-loading-text="拼命加载中"
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable">
+            <el-table-column type="index" :index="indexMethod" prop="index"  label="序号"  width="150" >  </el-table-column>
             <el-table-column prop="listingId" label="listingid (daftar id)"></el-table-column>
             <!-- <el-table-column prop="userId" label="userId"  ></el-table-column> -->
             <el-table-column  label="userid (id pengguna)"  >
-             <template scope="scope">
+             <template slot-scope="scope">
              
-               <span > <router-link :to="{ path: '/checkpeople',query:{userId:scope.row.userId}}">{{ scope.row.userId }} </router-link> </span>
+               <span > <router-link  target="_blank"  :to="{ path: '/checkpeople',query:{userId:scope.row.userId}}">{{ scope.row.userId }} </router-link> </span>
              </template>
            </el-table-column> 
             <el-table-column prop="listingTypeDesc" label="列表类型 (jenis tabel)"  ></el-table-column> 
             <el-table-column prop="ktpInfoauditResultStatus" label="KTP资料状态 (status data KTP)"></el-table-column>
             <el-table-column prop="bankCardInfoauditResultStatus" label="银行卡资料状态(status data bank)"></el-table-column>
-         
+            <el-table-column prop="ownerName" label="ownerName"></el-table-column>
             
             <el-table-column label="操作(operasi)" >
-             <template scope="scope">
-                  <el-button size="small" type="primary"  @click="handleRead(scope.$index, scope.row)">审核(verifikasi)</el-button>
+             <template slot-scope="scope">
+                  <el-button size="small" type="primary" :id="gernerateId(scope.$index)"
+                   @click="handleRead(scope.$index, scope.row)">审核(verifikasi)</el-button>
                 </template>
             </el-table-column>
         </el-table>
+           <div class="pagination">
+            <el-pagination
+                 @size-change="handleSizeChange"
+                 @current-change="handleCurrentChange"
+                 :current-page.sync="currentPage1"
+                 :page-size="pageSize"
+                 layout="total, prev, pager, next"
+                 :total="totalNum">
+           </el-pagination>
+        </div>
       <dialogEE v-bind:dialogVisible="dialogVisible" ></dialogEE>
-  <verifyPermission></verifyPermission>
+      <verifyPermission></verifyPermission>
     </div>
 </template>
 
@@ -39,15 +61,23 @@
     export default {
         data() {
             return {
-               // url:"http://172.20.15.48:8080/backend/IListingService/getPendAuditListingList",
+                //url:"http://172.20.15.13:2020/backend/IListingService/getPendAuditListingList",
                 url:"/backend/IListingService/getPendAuditListingList",
                 tableData: Array(),
                 cur_page: 1,
                 auditStatus:'2',
                 currentPage1:1,
                 totalNum:0,
-                pageSize:0,  
-                dialogVisible:false          
+                pageSize:20,  
+                dialogVisible:false,
+                loading:false,
+                 region:'',
+                userIdORphone:'',
+                is_search:'',
+                listingId:'',
+                userId:'' ,
+                // activeIndex:{},
+                // tabIndex: 0         
             }     
         },
         components: {
@@ -55,21 +85,9 @@
             'verifyPermission':verifyPermission,
         },
         created(){
-           
-        //    var CheckFunction1=Array();
-        // //    var CheckFunction =this.$store.getters.getFunction;
-        //      var CheckFunction =this.$store.state.FunctionUrl;
-        // //    var FF =localStorage.getItem('ChangeFunction');
-        // //    var CheckFunction1=FF.split(",");              
-        //    var Path=(this.$route.path).replace("/","");
-        // //    console.log(CheckFunction1);
-           
-        //     if(CheckFunction.indexOf(Path)=="-1"){
-        //         this.dialogVisible=true;
-        //         return false;
-        //     }
 
-            this.queryData();
+               
+           this.queryData(this.cur_page,this.pageSize,this.userId,this.listingId);
         },
         computed: {
             data(){
@@ -87,42 +105,83 @@
 
         },
         methods: {
+          gernerateId: function (index){
+
+             return "text" +index
+
+            },
+          indexMethod(index) {
+              return (index+1)+(this.cur_page-1)*this.pageSize;
+           },
            tableRowClassName(row, index) {
                //把每一行的索引放进row
-               row.index = (index+1)+(this.cur_page-1)*20;
+               row.index = (index+1)+(this.cur_page-1)*this.pageSize;
            },   
            handleSizeChange(val) {
 
             console.log(`每页 ${val} 条`);
           },
             handleCurrentChange(val){
-                this.cur_page = val;
-                this.queryData();
+                 let self = this;
+                self.cur_page = val;
+              self.queryData(self.cur_page,self.pageSize,self.userId,self.listingId);
             },
-
-            queryData(){
+            search(){
+                 let self = this;
+                 self.is_search = true;
+                 let userIdORphone=self.userIdORphone;
+                 let region=self.region;
+                        
+                if(userIdORphone=='') {
+                  self.$message.error('不能为空(userId tidak boleh kosong)！');
+                  return false;
+                }
+                if(region==1){
+                     self.userId=self.userIdORphone;
+                     self.listingId="";
+                     self.queryData(self.cur_page,self.pageSize,self.userId,self.listingId);
+                 }
+                if(region==2){
+                     self.listingId=self.userIdORphone;
+                      self.userId="";
+                      self.queryData(self.cur_page,self.pageSize,self.userId,self.listingId);
+                 }
+                      
+            },
+            queryData(cur_page,pageSize,userId,listingId){
                 let self = this;
             //   let listingId,userId,bankCardInfoauditResultStatus,ktpInfoauditResultStatus;
                 let params=Array();
                 self.tableData=Array();
+                 let axiosDate = new Date();
+                 self.loading=true;
                 var ktpInfoStatus,bankCardStatus;
-                self.$axios.post(self.url, {"auditStatus":this.auditStatus,"startPage":1,"pageSize":20}).then((res) => {
+                self.$axios.post(self.url, {"auditStatus":this.auditStatus,"startPage":cur_page,"pageSize":pageSize,"userId":userId,"listingId":listingId}).then((res) => {
                  
                   if(res.data.result==0){
 
-                      let ContentLength=res.data.content.length;
+                    let oDate = new Date()
+                    let time = oDate.getTime() - axiosDate.getTime()
+                    if (time < 500) time = 500
+                    setTimeout(() => {
+                       self.loading=false;
+                    }, time)
+
+                      let ContentLength=res.data.content.list.length;
+                       self.totalNum=res.data.content.totalCount;
+                         //  console.log("ContentLength"+ContentLength);
 
                       for(let i = 0;i< ContentLength ;i++){
                  
-                       if( res.data.content[i].listingInfo !=null){                       
-                          var listingId = res.data.content[i].listingInfo.listingId;                                   
-                          var userId = res.data.content[i].listingInfo.userId; 
-                          var listingTypeDesc=res.data.content[i].listingInfo.listingTypeDesc; 
-                                          
+                       if( res.data.content.list[i].listingInfo !=null){                       
+                          var listingId = res.data.content.list[i].listingInfo.listingId;                                   
+                          var userId = res.data.content.list[i].listingInfo.userId; 
+                          var listingTypeDesc=res.data.content.list[i].listingInfo.listingTypeDesc; 
+                          var ownerName = res.data.content.list[i].listingInfo.ownerName;              
                        }
                 
-                       if( res.data.content[i].bankCardInfo !=null){
-                       var bankCardInfoauditResultStatus = res.data.content[i].bankCardInfo.auditResultStatus; 
+                       if( res.data.content.list[i].bankCardInfo !=null){
+                       var bankCardInfoauditResultStatus = res.data.content.list[i].bankCardInfo.auditResultStatus; 
 
                             if(bankCardInfoauditResultStatus=="1"){
                                     bankCardStatus="待审核(menunggu verifikasi)";
@@ -133,8 +192,8 @@
                             }                     
                        }
 
-                      if( res.data.content[i].ktpInfo !=null){
-                        var ktpInfoauditResultStatus = res.data.content[i].ktpInfo.auditResultStatus;
+                      if( res.data.content.list[i].ktpInfo !=null){
+                        var ktpInfoauditResultStatus = res.data.content.list[i].ktpInfo.auditResultStatus;
 
 
                           if(ktpInfoauditResultStatus=="1"){
@@ -152,7 +211,8 @@
                                "listingId":listingId,
                                "listingTypeDesc":listingTypeDesc,
                                "bankCardInfoauditResultStatus":bankCardStatus,
-                               "ktpInfoauditResultStatus":ktpInfoStatus
+                               "ktpInfoauditResultStatus":ktpInfoStatus,
+                               "ownerName": ownerName
                         });           
   
                      }
@@ -178,8 +238,16 @@
                 return row.tag === value;
             },
             handleRead(index,row){
-                //this.$message('查看'+(index+1)+'行');
-                this.$router.push({ path: 'checkdetailtwo', query: { listingId: row.listingId, userId:row.userId}});
+               let self=this;
+            //    self.$set(self.activeIndex, self.tabIndex, index)
+            //    self.activeIndex[index]=index;
+                 //  console.log(event.target.innerText);
+                var but1 = document.getElementById('text'+index);
+                 but1.style.color = '#6600FF';
+
+
+                let routeData = self.$router.resolve({ path: 'checkdetailtwo', query: { listingId: row.listingId}});
+                window.open(routeData.href, '_blank');         
             }
         }
     }
@@ -198,5 +266,8 @@
 display: inline-block;
   margin-left: 50px;
   font-style: normal;
+}
+.purple{
+    color: #6600FF;
 }
 </style>

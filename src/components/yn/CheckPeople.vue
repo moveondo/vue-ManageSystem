@@ -3,7 +3,7 @@
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item><i class="el-icon-document"></i>审核(Verifikasi)</el-breadcrumb-item>
-                <el-breadcrumb-item>个人资料(Susunan verifikasi pertama)</el-breadcrumb-item>
+                <el-breadcrumb-item>个人资料(Data pribadi)</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="handle-box">     
@@ -21,6 +21,14 @@
                 <div class="text">userId: {{basics.userId}} </div>
                 <div class="text">mobile: {{basics.mobile}} </div>
           </div>
+            <div class="">
+                <el-tag>
+                    <router-link target="_blank" :to="{ path: '/internalrecord',query:{userId:this.userId}}">内部记录 (Catatan internal)</router-link>
+                </el-tag>
+                <el-tag>
+                    <router-link target="_blank" :to="{ path: '/auditrecord',query:{userId:this.userId}}">listing审核记录 (Catatan audit)</router-link>
+                </el-tag>
+            </div>
           <hr />
           <div class="ktpInfo" :model="ktpInfo" >
               <div class="Order">
@@ -38,8 +46,21 @@
                 </span>
              </div>
             </div>
+            <div class="Order">
+                <div class="text">advance message: {{KTPMEESSAGE}} </div>
+                <div class="text"></div>
+            </div>
           </div>
           <hr/>
+        <div class="ktpInfo">
+            <div class="Order">
+                <div class="text">活体照片(Foto wajah): <img v-bind:src="liveDetectPhotoUrl" /> </div>
+            </div>    
+            <div class="Order">
+                <div class="text">活体认证结果(Hasil otentikasi wajah):{{detectFlag}} </div>
+            </div>
+        </div>
+        <hr/>
            <div class="ktpInfo" :model="personalInfo" >
                <div class="Order">
              <div class="text">婚姻状况 (status pernikahan):{{personalInfo.maritalStatus}} </div>
@@ -115,8 +136,40 @@
             </div>
                 </div>
           </div>
+            <hr/>
+             
 
-         </div>      
+         </div>   
+          <div>标的列表(Susunan subjek):</div>
+           <el-table :data="data" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"   v-loading="loading"
+    element-loading-text="拼命加载中"
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)">
+            <el-table-column   type="index"   label="序号(Nomor urutan)"  width="100" >  </el-table-column>
+            <el-table-column prop="id" label="listingID "></el-table-column>
+            <el-table-column prop="amount" label="借款金额(Jumlah pinjaman)"></el-table-column>
+            <el-table-column prop="statusName" label="标的状态(Tanda status)"></el-table-column>
+            <el-table-column prop="periodNo" label="分期期数(Periode cicilan) "></el-table-column>
+            <el-table-column prop="termQuantity" label="贷款时长(Durasi pinjaman)"  ></el-table-column> 
+            <el-table-column prop="termUnit" label="借款期限单位(Unit periode pinjaman)"></el-table-column>
+            <el-table-column prop="riskPassTime" label="风控通过时间(Waktu melewati kontrol)"  :formatter="timetrans"></el-table-column>
+            <!-- <el-table-column prop="fullBidTime" label="满标时间(Waktu standar penuh)"   :formatter="timetrans"></el-table-column> 
+            <el-table-column prop="failBidTime" label="流标时间(Waktu transaksi gagal)"  :formatter="timetrans"></el-table-column> -->
+            <el-table-column prop="inserttime" label="发标时间(waktu transaksi)"  :formatter="timetrans"></el-table-column>
+           
+        </el-table>   
+           <div>额度信息 (Info limit):</div>
+           <el-table :data="data1" border style="width: 100%"  :row-class-name="tableRowClassName" ref="multipleTable"   v-loading="loading"
+    element-loading-text="拼命加载中"
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)">
+            <!-- <el-table-column  prop="index"  label="序号(Nomor urutan)"  width="100" >  </el-table-column> -->
+            <el-table-column prop="totalAmount" label="总额度( Jumlah limit) "></el-table-column>
+            <el-table-column prop="availAmount" label="可用额度( Limit yang dapat digunakan)"></el-table-column>
+            <el-table-column prop="pdlOccupiedAmount" label="待还本金pdl( pdl yang harus dikembalikan)"></el-table-column>
+            <el-table-column prop="installmentOccupiedAmount" label="待还本金cash(cash yang menunggu untuk dikembalikan) "></el-table-column>      
+        </el-table>  
+
      <dialogEE v-bind:dialogVisible="dialogVisible" ></dialogEE>
        <verifyPermission></verifyPermission>
     </div>
@@ -125,21 +178,33 @@
 <script>
    import dialogEE from './Dialog.vue';
    import verifyPermission from './Permission.vue';
+   import PCity from './../../assets/indonesia.json';
     export default {
         data() {
             return {
-                // url:"http://172.20.14.33:8086/backend/IUserAuthService/getUserDetailInfo",
-                // url2:"http://172.20.14.33:8086/backend/IUserAuthService/getUserDictionary",
-                // url1:"/api/backend/IThirdAuthService/ktpAuth",
-                // url3:"http://172.20.14.33:8086/backend/IUserAuthService/queryBankCardVerifyInfo",
+                // url:"http://172.20.15.13:2020/backend/IUserAuthService/getUserDetailInfo",
+                // url2:"http://172.20.15.13:2020/backend/IUserAuthService/getUserDictionary",
+                // url1:"http://172.20.15.13:2020/backend/IThirdAuthService/ktpAuth",
+                // url3:"http://172.20.15.13:2020/backend/IUserAuthService/queryBankCardVerifyInfo",            
+                // url4:"http://172.20.15.13:2020/backend/IListingService/queryLoanList", 
+                // url5:"http://172.20.15.13:2020/backend/IAmountService/queryAllLimitByUserId",
                 url:"/backend/IUserAuthService/getUserDetailInfo",
                 url2:"/backend/IUserAuthService/getUserDictionary",
                 url1:"/backend/IThirdAuthService/ktpAuth",
-                url3:"/backend/IUserAuthService/queryBankCardVerifyInfo",
+                url3:"/backend/IUserAuthService/queryBankCardVerifyInfo",            
+                url4:"/backend/IListingService/queryLoanList", 
+                url5:"/backend/IAmountService/queryAllLimitByUserId",
+                url6:"/backend/IUserAuthService/queryLiveDetect",
                 userIdORphone:'',
                 region:'',
                 is_search:false,
                 dialogVisible: false,
+                loading:false,
+                tableData:[],
+                tableData1:[],
+                ThisuserId:'',
+                userId:'',
+                KTPMEESSAGE:'no message',
                 message:"点击认证(klik mensahkan)",
                 bankmessage:"更新状态(update status)",
                 basics:{
@@ -196,8 +261,8 @@
                 loanUseList:Array(),
                 workAgeList:Array(),
                 relationShipList:Array(),
-
-                         
+                detectFlag:'',
+                liveDetectPhotoUrl:''                       
             }
         },
         components: {
@@ -205,27 +270,95 @@
             'verifyPermission':verifyPermission,
         },
         created(){
-        this.GetUserDictionary();
+             const self = this;
+            self.GetUserDictionary();
 
-            let userId=this.$route.query.userId;
+            let userId= self.$route.query.userId;
+            self.userId= userId;
             if(userId){
-              this.GetUserDictionary();
+              self.GetUserDictionary();
               let mobile="";
-               this.queryData(userId,mobile);
+               self.queryData(userId,mobile);
+               self.LoanData(userId);
+               self.queryAllLimit(userId);
+               self.queryLiveDetect(userId);
             }
            
         },
-    
+       computed: {
+            data(){
+                const self = this;
+                if(self.tableData===null){
+                    return self.tableData;
+                }else{
+                 return self.tableData.filter(function(d){                                    
+                     return d;                                                                 
+                    })
+                }
+            },
+           data1(){
+                const self = this;
+                if(self.tableData1===null){
+                    return self.tableData1;
+                }else{
+                 return self.tableData1.filter(function(d){                                    
+                     return d;                                                                 
+                    })
+                }
+            },
+
+        },  
         methods: {
-         
+           tableRowClassName(row, index) {
+               //把每一行的索引放进row
+               row.index = index+1;
+           }, 
+           handleSizeChange(val) {
+
+            console.log(`每页 ${val} 条`);
+           },
+            handleCurrentChange(val){
+                this.cur_page = val;
+               
+            },
+            queryLiveDetect(userId){
+                let self = this;          
+                self.$axios.post(self.url6, { "userId": userId }).then((res) => {
+
+                    if (res.data.result == 0) {
+                        let detectFlagR= res.data.content.detectFlag;
+                        if(detectFlagR===true){
+                           self.detectFlag ="成功(Sukses)";
+                           self.liveDetectPhotoUrl = res.data.content.liveDetectPhotoUrl;
+                        }else if(detectFlagR === false){
+                            self.detectFlag = "失败(Gagal)";
+                        }else{
+                            self.detectFlag = "无";
+                        }
+                                   
+                    } else if (res.data.result == '-99' || res.data.result == '-999') {
+                        self.$message.error(res.data.resultMessage);
+                    } else {
+                        self.$message.error(res.data.resultMessage);
+                    }
+
+                })
+
+            },
             queryData(userId,mobile){
                 let self = this;
+                self.clearValue();
                 self.$axios.post(self.url, {"userId":userId,"mobile":mobile}).then((res) => {
 
                     if(res.data.result==0){
 
                         self.basics.userId=res.data.content.userId;
                         self.basics.mobile=res.data.content.mobile;
+                       
+                        if(self.basics.userId){
+                            self.LoanData(self.basics.userId);
+                            self.queryAllLimit(self.basics.userId);
+                        }
                     
                     
                     if(res.data.content.personalInfo !=null){
@@ -243,9 +376,9 @@
 
 
                      self.personalInfo.educationLevel =self.eduList[res.data.content.personalInfo.educationLevel];
-                     self.personalInfo.province = res.data.content.personalInfo.province;
-                     self.personalInfo.city = res.data.content.personalInfo.city;
-                     self.personalInfo.area = res.data.content.personalInfo.area;
+                     self.personalInfo.province = PCity[1][res.data.content.personalInfo.province];
+                     self.personalInfo.city = PCity[res.data.content.personalInfo.province][res.data.content.personalInfo.city];
+                     self.personalInfo.area =PCity[res.data.content.personalInfo.city][res.data.content.personalInfo.area];
 
                     }else{
                           self.personalInfo.address = "";
@@ -265,6 +398,15 @@
                       self.ktpInfo.ktpNumber = res.data.content.ktpInfo.ktpNumber;
                       self.ktpInfo.ktpPhotoUrl = res.data.content.ktpInfo.ktpPhotoUrl;
                       self.ktpInfo.ktpSelfPhotoUrl = res.data.content.ktpInfo.ktpSelfPhotoUrl;
+                      if(res.data.content.ktpInfo.authStateMsg && res.data.content.ktpInfo.authStateMsg !=''){
+                           let group_json = JSON.parse(res.data.content.ktpInfo.authStateMsg);
+                            if(group_json.code=="SUCCESS"){
+                                var advanceName="KTPName："+group_json.data.name+",KTPNumber:"+group_json.data.idNumber; 
+                                self.KTPMEESSAGE=advanceName;
+                            }
+                      }
+                     
+                     
                         
                      if(res.data.content.ktpInfo.authState !==null){
                             
@@ -272,7 +414,7 @@
                        
                        var AuthState=self.CheckCode(res.data.content.ktpInfo.authState);
                        self.ktpInfo.AuthState=AuthState;
-                     }
+                     } 
                         
                     }else{
                           self.ktpInfo.ktpName = '';
@@ -345,26 +487,85 @@
                 })
             },
               search(){
-                 this.is_search = true;
-                 let userIdORphone=this.userIdORphone;
-                 let region=this.region;
+                     let self = this;
+                 self.is_search = true;
+                 let userIdORphone=self.userIdORphone;
+                 let region=self.region;
                  
               
                 if(userIdORphone=='') {
-                  this.$message.error('不能为空(userId tidak boleh kosong)！');
+                  self.$message.error('不能为空(userId tidak boleh kosong)！');
                   return false;
                 }
                 if(region==1){
-                     var userId=this.userIdORphone;
+                     var userId=self.userIdORphone;
                      var mobile="";
                  }
                 if(region==2){
-                     var mobile=this.userIdORphone;
+                     var mobile=self.userIdORphone;
                      var userId="";
                  }
                
-                this.GetUserDictionary();
-                this.queryData(userId,mobile);
+                self.GetUserDictionary();
+                self.queryData(userId,mobile);
+                
+            },
+            LoanData(borrowerId){
+                  let self = this;
+                  let axiosDate = new Date();
+                  self.loading=true;
+                  self.tableData=Array();
+                self.$axios.post(self.url4, {"borrowerId":borrowerId,"startPage":1,"pageSize":1000}).then((res) => {
+
+                    if(res.data.result==0){
+
+                        let oDate = new Date()
+                        let time = oDate.getTime() - axiosDate.getTime()
+                        if (time < 500) time = 500
+                        setTimeout(() => {
+                          self.loading=false;
+                        }, time);
+                     self.tableData=res.data.content.list;
+          
+                    }else if( res.data.result=='-99' || res.data.result=='-999'){
+                            self.$message.error(res.data.resultMessage);
+                    }else{
+                        self.$message.error(res.data.resultMessage);
+                    }          
+
+                })
+            },
+            queryAllLimit(userId){
+                  let self = this;
+                  let axiosDate = new Date();
+                  self.loading=true;
+                   self.tableData1=Array();
+                self.$axios.post(self.url5, {"userId":userId}).then((res) => {
+
+                    if(res.data.result==0){
+
+                        let oDate = new Date()
+                        let time = oDate.getTime() - axiosDate.getTime()
+                        if (time < 500) time = 500
+                        setTimeout(() => {
+                          self.loading=false;
+                        }, time);
+
+                        self.tableData1.push({
+                              "totalAmount":res.data.content.totalAmount,
+                                "availAmount":res.data.content.availAmount,
+                               "pdlOccupiedAmount":res.data.content.pdlOccupiedAmount,
+                               "installmentOccupiedAmount":res.data.content.installmentOccupiedAmount
+                        });
+                    
+          
+                    }else if( res.data.result=='-99' || res.data.result=='-999'){
+                            self.$message.error(res.data.resultMessage);
+                    }else{
+                        self.$message.error(res.data.resultMessage);
+                    }          
+
+                })
             },
             CheckCode(type){
               var statusName;
@@ -385,10 +586,11 @@
                  let userId=self.userId;
                  var bankCardNo= self.bankInfo.bankNum;
                  var bankCode=self.bankInfo.bankCode;
-                 var ownerName=self.bankInfo.bankName;
+                 var ownerName=self.ktpInfo.ktpName;
+                 var receptionHolderName=self.bankInfo.holder;
             
                  if(type=="bank"){
-                      self.$axios.post(self.url3, {"userId":userId,"bankCardNo":bankCardNo,"bankCode":bankCode,"ownerName":ownerName}).then((res) => {
+                      self.$axios.post(self.url3, {"userId":userId,"bankCardNo":bankCardNo,"bankCode":bankCode,"ownerName":ownerName,"receptionHolderName":receptionHolderName}).then((res) => {
                         if(res.data.result==0 && res.data.content.status==0){ 
                             self.message="更新成功(update success)！" ;                                               
                             self.$message.success('更新成功(update success)！');
@@ -482,7 +684,61 @@
                     }).catch(function(err){
                     console.log("调用失败",err)
                     })
-            }
+            },
+           timetrans:function(row, column) {  
+               var date = row[column.property];            
+                  if (date == undefined) {  
+                      return "";  
+                  }  
+                  var date = new Date(date);//如果date为13位不需要乘1000  
+            var Y = date.getFullYear() + '-';
+            var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+            var D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate()) + ' ';
+            var h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+            var m = (date.getMinutes() <10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+            var s = (date.getSeconds() <10 ? '0' + date.getSeconds() : date.getSeconds());
+            return Y+M+D+h+m+s;       
+          },
+          clearValue(){
+                    let self=this;
+                    self.personalInfo.address = "";
+                    self.personalInfo.maritalStatus='';                                
+                    self.personalInfo.area ='';   
+                    self.personalInfo.loanPurpose ='';   
+                    self.personalInfo.bornDate = '';   
+                    self.personalInfo.religion ='';   
+                    self.personalInfo.educationLevel ='';   
+                    self.personalInfo.province = '';   
+                    self.personalInfo.city = '';   
+                    self.personalInfo.area = '';   
+            
+                    self.ktpInfo.ktpName = '';
+                    self.ktpInfo.ktpNumber = '';
+                    self.ktpInfo.ktpPhotoUrl = '';
+                    self.ktpInfo.ktpSelfPhotoUrl = '';
+                    self.ktpInfo.authState='';
+            
+                    self.bankInfo.bankCode ='';
+                    self.bankInfo.bankName = '';
+                    self.bankInfo.bankNum ='';
+                    self.bankInfo.holder = '';
+                    self.bankInfo.status='';
+
+                    self.emergencyContact.contactMobile1 = '';
+                    self.emergencyContact.contactMobile2 = '';
+                    self.emergencyContact.contactName1 = '';
+                    self.emergencyContact.contactName2 = '';
+                    self.emergencyContact.relation1 ='';
+                    self.emergencyContact.relation2 ='';
+
+                    self.workInfo.companyName = '';
+                    self.workInfo.companyTel = '';
+                    self.workInfo.industry ='';
+                    self.workInfo.monthlyIncome = '';
+                    self.workInfo.workAddress = '';
+                    self.workInfo.workAge ='';
+                    self.workInfo.workPosition ='';           
+          }
         
            
            

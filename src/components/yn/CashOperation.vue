@@ -31,7 +31,7 @@
                 </el-form-item>
             
                 <el-form-item>
-                    <el-button type="primary" @click="onSubmit">提现</el-button>
+                    <el-button type="primary" v-bind:disabled="isActive"  @click="onSubmit">提现</el-button>
                     <el-button @click="onCancel">取消</el-button>
                 </el-form-item>
             </el-form>
@@ -51,6 +51,7 @@
                 // url:"/api/backend/capital/withdrawDeposit",
                  url:"/backend/capital/withdrawDeposit",
                 dialogVisible: false,
+                isActive:false,
                 form: {
                     loanId: '',
                     userId: '',
@@ -85,19 +86,22 @@
         },
         methods: {
             onSubmit() {
-                let loanId=this.form.loanId;
-                let userId=this.form.userId;
-                let bankNo=this.form.bankNo;
-                let bankCode=this.form.bankCode;
-                let bankHolderName=this.form.bankHolderName;
-                let amount=this.form.amount;
-                let description=this.form.description;
+                let self=this;
+                let loanId=self.form.loanId;
+                let userId=self.form.userId;
+                let bankNo=self.form.bankNo;
+                let bankCode=self.form.bankCode;
+                let bankHolderName=self.form.bankHolderName;
+                let amount=self.form.amount;
+                let description=self.form.description;
+                
 
                 if(loanId=='' ||userId=='' || bankNo=='' || bankCode=='' || bankHolderName=='' || amount=='') {
-                  this.$message.error('除描述字段外其余字段不能为空');
+                  self.$message.error('除备注字段外其余字段不能为空');
                   return false;
                 }
-                this.getData(loanId,userId,bankNo,bankCode,bankHolderName,amount,description);
+                self.isActive=true;
+                self.getData(loanId,userId,bankNo,bankCode,bankHolderName,amount,description);
                 
 
             },
@@ -105,20 +109,23 @@
                 let self = this;
                 self.$axios.post(self.url, {"loanId":loanId,"userId":userId,"bankNo":bankNo,"bankCode":bankCode,"bankHolderName":bankHolderName,"amount":amount,"description":description}).then((res) => {
                  if(res.data.result=="0"){
-                       this.$message.success('保存成功');
-                        this.form.loanId='';
-                        this.form.userId='';
-                        this.form.bankNo='';
-                        this.form.bankCode='';
-                        this.form.bankHolderName='';
-                        this.form.amount='';
-                        this.form.description='';
+                       self.$message.success('保存成功');
+                        self.form.loanId='';
+                        self.form.userId='';
+                        self.form.bankNo='';
+                        self.form.bankCode='';
+                        self.form.bankHolderName='';
+                        self.form.amount='';
+                        self.form.description='';
+                        self.isActive=false;
                  }else if (res.data.result=="-1"){
                    this.$message.error(res.data.resultMessage);
+                   self.isActive=false;
                  }else if( res.data.result=='-99' || res.data.result=='-999'){
                             self.$message.error(res.data.resultMessage);
                  }else{
                     self.$message.error(res.data.resultMessage);
+                    self.isActive=false;
                  }
                 
                    // this.$router.push({ path: 'productcreate1',query: { "productId": productId }});
@@ -139,3 +146,11 @@
         }
     }
 </script>
+<style scoped>
+ .disabled{
+     color: #fff;
+    background-color: #a0cfff;
+    border-color: #a0cfff;
+ }
+</style>
+

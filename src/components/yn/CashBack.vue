@@ -19,7 +19,7 @@
                     <el-input v-model="form.bankFlowNo"></el-input>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="onSubmit">回滚</el-button>
+                    <el-button type="primary" v-bind:disabled="isActive" @click="onSubmit">回滚</el-button>
                     <el-button @click="onCancel">取消</el-button>
                 </el-form-item>
             </el-form>
@@ -38,6 +38,7 @@
                // url:"/api/backend/capital/withdrawFail",
                url:"/backend/capital/withdrawFail",
                 dialogVisible: false,
+                isActive:false,
                 form: {
                     loanId: '',
                     userId: '',
@@ -60,15 +61,17 @@
         },
         methods: {
             onSubmit() {
-                let loanId=this.form.loanId;
-                let userId=this.form.userId;
-                let bankFlowNo=this.form.bankFlowNo;
+                 let self=this;
+                let loanId=self.form.loanId;
+                let userId=self.form.userId;
+                let bankFlowNo=self.form.bankFlowNo;
         
                 if(loanId=='' || userId=='' || bankFlowNo=='') {
-                  this.$message.error('所有字段不能为空');
+                  self.$message.error('所有字段不能为空');
                   return false;
                 }
-                this.getData(loanId,userId,bankFlowNo);
+                 self.isActive=true;
+                self.getData(loanId,userId,bankFlowNo);
                 
 
             },
@@ -80,12 +83,15 @@
                         this.form.loanId='';
                         this.form.userId='';
                         this.form.bankFlowNo='';
+                          self.isActive=false;
                  }else if (res.data.result=="-1"){
                    this.$message.error(res.data.resultMessage);
+                     self.isActive=false;
                  }else if( res.data.result=='-99' || res.data.result=='-999'){
                             self.$message.error(res.data.resultMessage);
                  }else{
                     self.$message.error(res.data.resultMessage);
+                      self.isActive=false;
                  }
                 
                    // this.$router.push({ path: 'productcreate1',query: { "productId": productId }});

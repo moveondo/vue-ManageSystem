@@ -9,7 +9,7 @@
        <div class="message"  >
                <table class="table table-striped table-bordered">             
                    <tbody>
-                     <tr v-for="(item, index) of UserMessage" >
+                     <tr v-for="(item, index) of UserMessage" :key="index"  >
                        <td>基本信息(Data dasar):</td>
                        <td><router-link target="_blank" :to="{ path: '/checkpeople',query:{userId:item.userId}}">{{item.ktpName}}</router-link> ,</td>
                        <td>(列表(Susunan)ID:{{item.id}}, </td>
@@ -23,22 +23,22 @@
        <el-table :data="tableData"  style="width: 100%">
         <el-table-column prop="Dataitem" label="资料项(Bagian data)"  width="180"></el-table-column>
         <el-table-column prop="ktpPhotoUrl" label="图片1(Gambar)" width="180" header-align="center">
-            <template  scope="scope">
-                 <span v-if="scope.row.ktpPhotoUrl" @click = "ClickImg(scope.row.ktpPhotoUrl)" > <img :src="scope.row.ktpPhotoUrl" width="90" height="90"/></span>
+            <template  slot-scope="scope">
+                 <span v-if="scope.row.ktpPhotoUrl" @click = "ClickImg(scope.row.ktpPhotoUrl,scope.row)" > <img :src="scope.row.ktpPhotoUrl" width="90" height="90"/></span>
                  <span v-else>  </span>         
             </template>
         </el-table-column>
         <el-table-column prop="ktpSelfPhotoUrl" label="图片2(Gambar)"  width="180">
-             <template  scope="scope">
-                 <span v-if="scope.row.ktpSelfPhotoUrl"  @click = "ClickImg(scope.row.ktpSelfPhotoUrl)"> <img :src="scope.row.ktpSelfPhotoUrl" width="90" height="90"/></span>
+             <template  slot-scope="scope">
+                 <span v-if="scope.row.ktpSelfPhotoUrl"  @click = "ClickImg(scope.row.ktpSelfPhotoUrl,scope.row)"> <img :src="scope.row.ktpSelfPhotoUrl" width="90" height="90"/></span>
                  <span v-else>  </span>         
             </template>
         </el-table-column>
         <el-table-column  label="资料审核(Verifikasi data)">
-            <template scope="scope">
+            <template slot-scope="scope">
                 <!-- <div>{{ scope.row.BCFstatus}}</div> -->
                 <div v-if="scope.$index==1 && scope.row.BCFstatus=='-1'">
-                  <el-button size="small" type="primary" disabled  @click="Verify(scope.$index, scope.row)">通过(terlewati)</el-button>    
+                  <el-button size="small" type="primary"  @click="Verify(scope.$index, scope.row)">通过(terlewati)</el-button>    
                   <el-button size="small" type="warning"  @click="Refuse(scope.$index, scope.row)">拒绝 (tolak)</el-button> 
                 </div>
                  <div v-else-if="scope.$index==1 && scope.row.BCFstatus=='0'">
@@ -63,15 +63,46 @@
         <el-table-column prop="status" label="审核状态(status verifikasi)"  width="180"></el-table-column>
       </el-table>
 
-        <div class="first" >
+        <div class="ktpInfo">
+            <div class="Order">
+                <div class="text"  @click = "ClickImglive()">活体照片(Foto wajah):
+                    <img v-bind:src="liveDetectPhotoUrl" /> 
+                </div>
+            </div>
+            <div class="Order">
+                <div class="text">活体认证结果(Hasil otentikasi wajah):{{detectFlag}} </div>
+            </div>
+        </div>
+       
+        <el-form :model="ruleForm" ref="ruleForm" label-width="50px" class="select" style="margin-top:60px;">
+            <el-form-item label="选择Pilih" prop="">
+                <el-select v-model="ruleForm.value1" placeholder="请选择Pilih">
+                    <el-option v-for="item1 in answerPeople" :key="item1.value" :label="item1.option" :value="item1.value"></el-option>
+                </el-select>
+                <el-select v-model="ruleForm.value2" placeholder="请选择Pilih">
+                    <el-option v-for="item in answerResult" :key="item.value" :label="item.option" :value="item.value"></el-option>
+                </el-select>
+                <el-button type="primary" @click="submitForm('ruleForm')">提交(Kirim)</el-button>
+            <el-tag >
+                <router-link target="_blank" :to="{ path: '/internalrecord',query:{userId:this.userId,userName:this.userName}}">内部记录 (Catatan internal)</router-link>
+            </el-tag>
+            <el-tag>
+                <router-link target="_blank" :to="{ path: '/auditrecord',query:{userId:this.userId}}">listing审核记录 (Catatan audit)</router-link>
+            </el-tag>
+            </el-form-item>      
+        </el-form>
+        
+        
+        <div class="first"  >
             初次审核(印尼)Verifikasi tahap pertawa (Indonesia)
-           <span v-model="listingStatus"> 审核状态(status verifikasi):{{listingStatus}}</span>
+           审核状态(status verifikasi):<span > {{listingStatus}}</span>
         </div>
         <hr/>
         <div class="check" >
           <div v-if=" active===true ">
            <el-button type="primary" id="qq" @click="First('pass')">初审通过(tahap pertama terlewati)</el-button>
-           <el-button type="warning"  @click="First('refuse')">拒绝(tolak)</el-button>
+           <el-button type="warning" @click="dialogFormVisible = true">拒绝(tolak)</el-button>
+           <!-- @click="First('refuse')" -->
           </div>
           <div v-else>
            <el-button type="success"  disabled>{{message}}</el-button>
@@ -79,7 +110,23 @@
         </div>
          <dialogEE v-bind:dialogVisible="dialogVisible" ></dialogEE>
          <verifyPermission></verifyPermission>
-       
+        
+        <el-dialog title="请选择拒绝原因" :visible.sync="dialogFormVisible" style="margin-left:50px;">
+            <div v-for="city in refuseReason" :label="city.bigItem" :key="city.bigItem">
+                <span> {{city.bigItem}}</span>
+                <el-checkbox-group v-model="checkList">
+                    <el-checkbox v-for="item in city.smallItem" :label="city.bigItem+':'+item" :key="item">
+                        {{item}}
+                    </el-checkbox>
+                </el-checkbox-group>
+            
+            </div>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="First('refuse')" v-bind:disabled="isActive">提交(Kirim)</el-button>
+            </div>
+        </el-dialog>
+
     </div>
 </template>
 
@@ -89,20 +136,26 @@
     export default {
         data() {
             return {
-                // url:"http://172.20.14.33:8086/backend/IListingService/getPendAuditListingList",
-                // personurl:"http://172.20.14.33:8086/backend/IListingService/getPendAuditDetail",
-                // VerifyKTPurl:"http://172.20.14.33:8086/backend/IUserAuthService/submitKtpAuditInfo",
-                // VerifyBankurl:"http://172.20.14.33:8086/backend/IUserAuthService/submitBankCardAuditInfo",
-                // FirstListing:"http://172.20.14.33:8086/backend/IListingService/submitListingAuditInfo",
+                // url:"http://172.20.14.33:8080/backend/IListingService/getPendAuditListingList",
+                // personurl:"http://172.20.14.33:8080/backend/IListingService/getPendAuditDetail",
+                // VerifyKTPurl:"http://172.20.14.33:8080/backend/IUserAuthService/submitKtpAuditInfo",
+                // VerifyBankurl:"http://172.20.14.33:8080/backend/IUserAuthService/submitBankCardAuditInfo",
+                // FirstListing:"http://172.20.14.33:8080/backend/IListingService/submitListingAuditInfo",
+                // Infourl: "http://172.20.14.33:8080/backend/IListingAuditFlowLogService/getAudDetailDynaConfInfo",
+                // submitinfo:"http://172.20.14.33:8080/backend/IListingAuditFlowLogService/submitListingAuditFlowLog",
                 url:"/backend/IListingService/getPendAuditListingList",
                 personurl:"/backend/IListingService/getPendAuditDetail",
                 VerifyKTPurl:"/backend/IUserAuthService/submitKtpAuditInfo",
                 VerifyBankurl:"backend/IUserAuthService/submitBankCardAuditInfo",
                 FirstListing:"/backend/IListingService/submitListingAuditInfo",
+                Infourl:"/backend/IListingAuditFlowLogService/getAudDetailDynaConfInfo",
+                submitinfo: "/backend/IListingAuditFlowLogService/submitListingAuditFlowLog",
+                url6:"/backend/IUserAuthService/queryLiveDetect",
                 active:true,
                 dialogVisible: false, 
                 listingStatus:"",
                 UserMessage:[],
+                userId:'',
                 tableData: [{
                     Dataitem: 'KTP',
                     ktpPhotoUrl: '',
@@ -111,8 +164,21 @@
                     Dataitem: '银行卡(kartu bank)',
                     ktpPhotoUrl: '',
                     ktpSelfPhotoUrl: ''
-                }]
-               
+                }],  
+                ruleForm: {
+                    value1: '',
+                    value2: '',
+                },
+                answerResult:[],
+                answerPeople:[],
+                refuseReason:[],
+                SmallItem:[],
+                checkList:[],
+                dialogFormVisible: false,
+                isActive: false,
+                userName:'',
+                detectFlag:'',
+                liveDetectPhotoUrl:''
             }
         },
        components: {
@@ -120,18 +186,10 @@
             'verifyPermission':verifyPermission, 
         },
         created(){
-            //   var CheckFunction =this.$store.state.FunctionUrl;           
-            //   var Path=(this.$route.path).replace("/","");;
-            // if(CheckFunction.indexOf(Path)=="-1"){
-            //     this.dialogVisible=true;
-            //     return false;
-            // }
               
-              var listingId=this.$route.query.listingId;
-              var userId=this.$route.query.userId;
-            
-             
-              this.queryPersonData(listingId,userId);
+              var listingId=this.$route.query.listingId;       
+              this.queryPersonData(listingId);
+              this.queryInfo();
         },
         computed: {
             data(){
@@ -147,6 +205,94 @@
 
         },
         methods: {
+           queryInfo(){
+               let self = this;
+                self.$axios.post(self.Infourl).then((res) => {
+                   if (res.data.result == 0) {
+                      self.answerResult=res.data.content.answerResult;
+                      self.answerPeople = res.data.content.answerPeople;
+                      self.refuseReason = res.data.content.refuseReason;
+                    //   for(let i=0;i< self.refuseReason.length; i++){
+                    //       for(let j=0;j< self.refuseReason[i].smallItem.length;j++){
+                    //           console.log(self.refuseReason[i].bigItem+":"+self.refuseReason[i].smallItem[j])
+                    //       }
+                    //   }
+                   }
+               }).catch(function (err) {
+                   console.log("调用失败", err)
+               })
+           },
+             submitData(type) {
+                let self = this;
+                let userId = self.userId;
+                let listingId = self.$route.query.listingId; 
+                let auditName  = localStorage.getItem('ms_username');
+                let operate;
+                 let auditContent;
+                           
+                if(type== 'phone'){
+                    operate = 1;
+                    auditContent = "接听人员(Petugas penjawab):" + self.ruleForm.value1 + ",接听状态(Status):" + self.ruleForm.value2;
+                }else if(type=='firstpass'){
+                     operate = 3;
+                    auditContent="一审通过(Audit pertama terlewati)";
+                }else if(type=='firstrefuse'){
+                    operate = 5;
+                 
+                     let Lengthcheck=self.checkList.length;
+                     let str;
+                     for(let k=0;k<Lengthcheck;k++){
+                         if(k==0){
+                            str= self.checkList[0];
+                         }else{
+                             str= str+";"+ self.checkList[k];
+                         }
+                     }
+                    
+                    auditContent = "审核拒绝(Penolakan audit),理由(Penyebab)"+str;
+                }
+            
+                self.$axios.post(self.submitinfo, { "userId":userId,"listingId":listingId, "auditName": auditName, "operate": operate,"auditContent": auditContent }).then((res) => {
+
+                    if (res.data.result == 0) {
+
+                        self.$message.success("提交成功");
+                        self.ruleForm.value1 = '';
+                        self.ruleForm.value2 = '';
+                        self.checkList=[];
+                        self.dialogFormVisible=false;
+
+                    } else if (res.data.result == '-99' || res.data.result == '-999') {
+                        self.$message.error(res.data.resultMessage);
+                    } else {
+                        self.$message.error(res.data.resultMessage);
+                    }
+
+
+                })
+            },  
+
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                         let self = this;
+                        if (self.ruleForm.value1 == '' || self.ruleForm.value1 == null) {
+                            self.$message.error("联系人不能为空Kenalan tidak boleh kosong");
+                            return false;
+                        }
+                        if (self.ruleForm.value2 == '' || self.ruleForm.value2 == null) {
+                            self.$message.error("联系状态不能为空Status kontak tidak boleh kosong");
+                            return false;
+                        }  
+
+                        self.submitData('phone');
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+          
            tableRowClassName(row, index) {
                //把每一行的索引放进row
                row.index = (index+1)+(this.cur_page-1)*20;
@@ -159,16 +305,34 @@
                 this.cur_page = val;
                 // this.queryData();
             },
-            ClickImg(imgURL){
+            ClickImg(imgURL,row){
 
-              window.open(imgURL);
+             let KTPname=row.ktpName;
+             let KTPNO=row.ktpNo;
+             let img=imgURL;
+             let imgSRC="//indonesia-object.oss-ap-southeast-5.aliyuncs.com/ktpDeal/imgdeal.html?KTPname="+KTPname+"&KTPNO="+KTPNO+"&imgurl="+img;
+             window.open( imgSRC, '_blank'); 
+
+            },
+            ClickImglive(){
+               let self = this;
+               let KTPname=null;
+               let KTPNO=null;
+               let img=self.liveDetectPhotoUrl;
+               if(img=='' || img==null){
+                      self.$message.error("照片为空！");
+                      return false;
+               }
+               let imgSRC="//indonesia-object.oss-ap-southeast-5.aliyuncs.com/ktpDeal/imgdeal.html?KTPname="+KTPname+"&KTPNO="+KTPNO+"&imgurl="+img;
+               window.open( imgSRC, '_blank'); 
             },
             First(msg){
                   let self = this;
-                 var listingId=this.$route.query.listingId;
-                 var userId=this.$route.query.userId;
+                 var listingId=self.$route.query.listingId;
+                 var userId=self.userId;
 
               if(msg=="pass"){
+                  self.submitData('firstpass');
                  self.$axios.post(self.FirstListing, {"userId":userId,"listingId":listingId,"auditStatus":1}).then((res) => {
                         if(res.data.result==0){                         
                             this.active=false;
@@ -183,13 +347,24 @@
                     console.log("调用失败",err)
                     })
               }else if(msg=="refuse"){
+                  
+                   if (self.checkList.length == 0) {
+                      this.$message.error("请选择Pilih拒绝原因！");
+                      return false;
+                  }
+                  self.isActive = true;
+                   self.submitData('firstrefuse');
+                  
                    self.$axios.post(self.FirstListing, {"userId":userId,"listingId":listingId,"auditStatus":0}).then((res) => {
                         if(res.data.result==0){                         
                             this.active=false;
                             this.message="审核拒绝(tolak)";
                             this.$message.success('审核拒绝(tolak)');
+                            self.isActive = false;
                         }else{
                             this.$message.error(res.data.resultMessage);
+                            self.isActive = false;
+
                         }
                         
                     }).catch(function(err){
@@ -197,7 +372,7 @@
                     })
               }
             },
-            queryPersonData(listingId,userId){
+            queryPersonData(listingId){
                    let self = this;
                     self.UserMessage=Array();
                    
@@ -209,12 +384,15 @@
                    for(let i=0; i< Length; i++){
 
                        if(res.data.content[i].listingInfo !=null){
-                           var id=res.data.content[i].listingInfo.id;
+
+
+                            var listingid=res.data.content[i].listingInfo.id;
                             var amount=res.data.content[i].listingInfo.amount;
                             var status=res.data.content[i].listingInfo.status;
-                            var periodNo=res.data.content[i].listingInfo.periodNo;
+                            var periodNo=res.data.content[i].listingInfo.termQuantity;//换成termQuantity
                             var termUnit=res.data.content[i].listingInfo.termUnit;
                             var listingStatus=res.data.content[i].listingInfo.status;
+                            self.userId=res.data.content[i].listingInfo.borrowerId;
                        }
                       
                       if(res.data.content[i].ktpInfo !=null){
@@ -230,7 +408,7 @@
                       var bankCardNo=res.data.content[i].bankCardInfo.bankCardNo;
                       var ownerName=res.data.content[i].bankCardInfo.ownerName;
                       var receptionHolderName=res.data.content[i].bankCardInfo.receptionHolderName;
-                      var id=res.data.content[i].bankCardInfo.id;
+                      var bankid=res.data.content[i].bankCardInfo.id;
                       var bankStatus=res.data.content[i].bankCardInfo.auditResultStatus;
                       var bankCardInfoStatus=res.data.content[i].bankCardInfo.status;
                       var bankCode=res.data.content[i].bankCardInfo.bankCode;
@@ -246,10 +424,12 @@
                             ktpSelfPhotoUrl: ''
                         }]
                      
+                        self.userName= ktpName+"/"+ ktpNo;
                                 
                         self.UserMessage.push({
-                              "userId":userId,
-                               "id":id,
+                              "userId":self.userId,
+                               "id":listingId,
+                               "bankid":bankid,
                                "amount":amount,
                                "status":status,
                                "periodNo":periodNo,
@@ -271,7 +451,9 @@
                     //   console.log(self.UserMessage[0]);
                         
                    }
-                                     
+
+                    self.queryLiveDetect(self.userId);
+
                     if(self.UserMessage[0].ktpPhotoUrl){
                     
                             this.tableData[0].ktpPhotoUrl=self.UserMessage[0].ktpPhotoUrl;
@@ -292,6 +474,7 @@
                     this.tableData[1].ownerName=self.UserMessage[0].ownerName;
                     this.tableData[1].receptionHolderName=self.UserMessage[0].receptionHolderName;
                     this.tableData[1].id=self.UserMessage[0].id;
+                    this.tableData[1].bankid=self.UserMessage[0].bankid;
                     this.tableData[1].bankCode=self.UserMessage[0].bankCode;                  
                     var bankStatus=this.CheckCode("bankORkpt",self.UserMessage[0].bankStatus);
                     this.tableData[1].status=bankStatus;
@@ -299,6 +482,30 @@
                     // alert( this.tableData[1].BCFstatus);
                     
               })
+
+            },
+            queryLiveDetect(userId){
+                let self = this;          
+                self.$axios.post(self.url6, { "userId": userId }).then((res) => {
+
+                    if (res.data.result == 0) {
+                        let detectFlagR= res.data.content.detectFlag;
+                        if(detectFlagR===true){
+                           self.detectFlag ="成功(Sukses)";
+                           self.liveDetectPhotoUrl = res.data.content.liveDetectPhotoUrl;
+                        }else if(detectFlagR === false){
+                            self.detectFlag = "失败(Gagal)";
+                        }else{
+                            self.detectFlag = "无";
+                        }
+                                   
+                    } else if (res.data.result == '-99' || res.data.result == '-999') {
+                        self.$message.error(res.data.resultMessage);
+                    } else {
+                        self.$message.error(res.data.resultMessage);
+                    }
+
+                })
 
             },
             index(row, column){
@@ -329,7 +536,7 @@
             },
             Verify(index,row){
                let self = this;
-               var userId=row.userId;
+               var userId=self.userId;
                var ktpNo=row.ktpNo;
                var ktpName=row.ktpName;
 
@@ -339,7 +546,7 @@
                var ownerName=row.ownerName;
                var bankCode=row.bankCode;
                var receptionHolderName=row.receptionHolderName;
-                let id=row.id;
+                let id=row.bankid;
          
                if(index==0){
                   
@@ -372,7 +579,7 @@
             },
              Refuse(index,row){
                let self = this;
-               let userId=row.userId;
+               let userId=self.userId;
                let ktpNo=row.ktpNo;
                let ktpName=row.ktpName;
 
@@ -381,7 +588,7 @@
                let ownerName=row.ownerName;
                let bankCode=row.bankCode;
                let receptionHolderName=row.receptionHolderName;
-               let id=row.id;
+               let id=row.bankid;
                 
 
               if(index==0){
@@ -419,8 +626,8 @@
             },
             Reload(){
               var listingId=this.$route.query.listingId;
-              var userId=this.$route.query.userId;
-              this.queryPersonData(listingId,userId);
+            
+              this.queryPersonData(listingId);
             }
         }
     }
@@ -440,6 +647,28 @@ opacity:0.5;
 }
 .check{
     margin-bottom: 50px;
+}
+
+.ktpInfo{
+    line-height: 20px;
+        /* display: flex;
+        justify-content:space-evenly; */
+}
+.ktpInfo img{
+    width: 100px;
+    height: 100px;
+}
+.Order{
+    display: flex;
+   justify-content: space-between;
+}
+.text{
+    vertical-align: middle;
+    font-size: 15px;
+    color: #48576a;
+    line-height: 1;
+    padding: 11px 12px 11px 0;
+    box-sizing: border-box;
 }
 
 </style>
